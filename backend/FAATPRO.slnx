@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="FAATPRO.API/FAATPRO.API.csproj" />
+  <Project Path="FAATPRO.Application/FAATPRO.Application.csproj" />
+  <Project Path="FAATPRO.Domain/FAATPRO.Domain.csproj" />
+  <Project Path="FAATPRO.Infrastructure/FAATPRO.Infrastructure.csproj" />
+  <Project Path="FAATPRO.Shared/FAATPRO.Shared.csproj" />
+</Solution>
