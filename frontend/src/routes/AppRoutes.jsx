@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
-import ProtectedRoute from "../redux/auth/ProtectedRoute";
+import ProtectedRoute from "../auth/ProtectedRoute";
 
 
 // Public Pages
@@ -22,21 +22,27 @@ import Profile from "../pages/Profile";
 import ChangePassword from "../pages/ChangePassword";
 
 
+
 // Company Module
 
 import CompanyList from "../pages/company/CompanyList";
 
 
+// Branch Module
+
+import BranchList from "../pages/branch/BranchList";
+
+
+
 
 const AppRoutes = () => {
+
   return (
+
     <Routes>
 
 
-      {/* =========================
-          PUBLIC ROUTES
-      ========================== */}
-
+      {/* PUBLIC */}
 
       <Route
         path="/login"
@@ -57,18 +63,13 @@ const AppRoutes = () => {
 
 
 
-
-
-      {/* =========================
-          PROTECTED ROUTES
-      ========================== */}
-
-
+      {/* DASHBOARD */}
 
       <Route
         path="/"
 
         element={
+
           <ProtectedRoute>
 
             <MainLayout>
@@ -78,6 +79,7 @@ const AppRoutes = () => {
             </MainLayout>
 
           </ProtectedRoute>
+
         }
 
       />
@@ -85,11 +87,13 @@ const AppRoutes = () => {
 
 
 
+      {/* CUSTOMERS */}
 
       <Route
         path="/customers"
 
         element={
+
           <ProtectedRoute>
 
             <MainLayout>
@@ -99,6 +103,7 @@ const AppRoutes = () => {
             </MainLayout>
 
           </ProtectedRoute>
+
         }
 
       />
@@ -107,12 +112,7 @@ const AppRoutes = () => {
 
 
 
-
-
-      {/* =========================
-          COMPANY MODULE
-      ========================== */}
-
+      {/* COMPANY */}
 
       <Route
         path="/company"
@@ -137,12 +137,38 @@ const AppRoutes = () => {
 
 
 
+      {/* BRANCH */}
 
+      <Route
+        path="/branch"
+
+        element={
+
+          <ProtectedRoute>
+
+            <MainLayout>
+
+              <BranchList />
+
+            </MainLayout>
+
+          </ProtectedRoute>
+
+        }
+
+      />
+
+
+
+
+
+      {/* SETTINGS */}
 
       <Route
         path="/settings"
 
         element={
+
           <ProtectedRoute>
 
             <MainLayout>
@@ -152,6 +178,7 @@ const AppRoutes = () => {
             </MainLayout>
 
           </ProtectedRoute>
+
         }
 
       />
@@ -160,10 +187,13 @@ const AppRoutes = () => {
 
 
 
+      {/* PROFILE */}
+
       <Route
         path="/profile"
 
         element={
+
           <ProtectedRoute>
 
             <MainLayout>
@@ -173,6 +203,7 @@ const AppRoutes = () => {
             </MainLayout>
 
           </ProtectedRoute>
+
         }
 
       />
@@ -181,10 +212,13 @@ const AppRoutes = () => {
 
 
 
+      {/* CHANGE PASSWORD */}
+
       <Route
         path="/change-password"
 
         element={
+
           <ProtectedRoute>
 
             <MainLayout>
@@ -194,6 +228,7 @@ const AppRoutes = () => {
             </MainLayout>
 
           </ProtectedRoute>
+
         }
 
       />
@@ -202,18 +237,18 @@ const AppRoutes = () => {
 
 
 
-      {/* Default Redirect */}
+      {/* FALLBACK */}
 
       <Route
         path="*"
-
         element={<Login />}
-
       />
 
 
     </Routes>
+
   );
+
 };
 
 

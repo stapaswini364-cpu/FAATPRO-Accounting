@@ -13,7 +13,9 @@ import { getDashboardSummary } from "../../api/dashboardApi";
 
 const Dashboard = () => {
 
+
   const [summary, setSummary] = useState(null);
+
 
 
   useEffect(() => {
@@ -24,11 +26,15 @@ const Dashboard = () => {
 
 
 
+
   const loadDashboard = async () => {
+
 
     try {
 
+
       const response = await getDashboardSummary();
+
 
       console.log(
         "Dashboard API Response:",
@@ -36,25 +42,35 @@ const Dashboard = () => {
       );
 
 
+
       setSummary(
         response.data.data ?? response.data
       );
 
+
     }
-    catch(error) {
+    catch(error)
+    {
+
 
       console.log(
         "Dashboard API Error:",
         error.response?.data || error.message
       );
 
+
     }
+
 
   };
 
 
 
+
+
+
   if (!summary) {
+
 
     return (
 
@@ -64,11 +80,16 @@ const Dashboard = () => {
           Loading Dashboard...
         </Typography>
 
+
       </Box>
 
     );
 
+
   }
+
+
+
 
 
 
@@ -78,26 +99,55 @@ const Dashboard = () => {
 
 
       <Typography
+
         variant="h4"
+
         mb={3}
+
       >
+
         FAATPRO Dashboard
+
       </Typography>
 
 
 
-      <Grid container spacing={3}>
 
 
-        <Grid item xs={12} md={3}>
+
+
+      <Grid
+
+        container
+
+        spacing={3}
+
+      >
+
+
+
+
+
+
+        <Grid
+
+          size={{
+            xs:12,
+            md:3
+          }}
+
+        >
+
 
           <Card>
 
             <CardContent>
 
+
               <Typography>
                 Total Customers
               </Typography>
+
 
 
               <Typography variant="h5">
@@ -107,9 +157,12 @@ const Dashboard = () => {
               </Typography>
 
 
+
             </CardContent>
 
+
           </Card>
+
 
         </Grid>
 
@@ -117,15 +170,29 @@ const Dashboard = () => {
 
 
 
-        <Grid item xs={12} md={3}>
+
+
+
+
+        <Grid
+
+          size={{
+            xs:12,
+            md:3
+          }}
+
+        >
+
 
           <Card>
 
             <CardContent>
 
+
               <Typography>
                 Total Vendors
               </Typography>
+
 
 
               <Typography variant="h5">
@@ -135,9 +202,12 @@ const Dashboard = () => {
               </Typography>
 
 
+
             </CardContent>
 
+
           </Card>
+
 
         </Grid>
 
@@ -145,15 +215,29 @@ const Dashboard = () => {
 
 
 
-        <Grid item xs={12} md={3}>
+
+
+
+
+        <Grid
+
+          size={{
+            xs:12,
+            md:3
+          }}
+
+        >
+
 
           <Card>
 
             <CardContent>
 
+
               <Typography>
                 Total Revenue
               </Typography>
+
 
 
               <Typography variant="h5">
@@ -163,9 +247,12 @@ const Dashboard = () => {
               </Typography>
 
 
+
             </CardContent>
 
+
           </Card>
+
 
         </Grid>
 
@@ -173,15 +260,29 @@ const Dashboard = () => {
 
 
 
-        <Grid item xs={12} md={3}>
+
+
+
+
+        <Grid
+
+          size={{
+            xs:12,
+            md:3
+          }}
+
+        >
+
 
           <Card>
 
             <CardContent>
 
+
               <Typography>
                 Total Expense
               </Typography>
+
 
 
               <Typography variant="h5">
@@ -191,22 +292,31 @@ const Dashboard = () => {
               </Typography>
 
 
+
             </CardContent>
+
 
           </Card>
 
+
         </Grid>
+
+
 
 
 
       </Grid>
 
 
+
+
     </Box>
 
   );
 
+
 };
+
 
 
 export default Dashboard;

@@ -2,40 +2,69 @@ import {
   LayoutDashboard,
   Users,
   Settings,
+  Building2,
+  GitBranch,
   X
 } from "lucide-react";
 
+
 import { NavLink } from "react-router-dom";
+
 
 
 const Sidebar = ({ open, setOpen }) => {
 
 
+
 const menuItems = [
+
   {
     name:"Dashboard",
     path:"/",
     icon:<LayoutDashboard/>
   },
+
+
   {
     name:"Customers",
     path:"/customers",
     icon:<Users/>
   },
+
+
+  {
+    name:"Company",
+    path:"/company",
+    icon:<Building2/>
+  },
+
+
+  {
+    name:"Branch",
+    path:"/branch",
+    icon:<GitBranch/>
+  },
+
+
   {
     name:"Settings",
     path:"/settings",
     icon:<Settings/>
   }
+
 ];
+
+
+
 
 
 return (
 
 <div
+
 className={`
 fixed md:static
-top-0 left-0
+top:0 left:0
 h-screen
 w-64
 bg-gray-900
@@ -47,6 +76,7 @@ ${open ? "translate-x-0" : "-translate-x-full"}
 md:translate-x-0
 z-50
 `}
+
 >
 
 
@@ -58,9 +88,13 @@ FAATPRO
 </h1>
 
 
+
 <button
+
 className="md:hidden"
+
 onClick={()=>setOpen(false)}
+
 >
 
 <X/>
@@ -72,20 +106,27 @@ onClick={()=>setOpen(false)}
 
 
 
+
+
 <nav className="space-y-3">
 
 
 {
+
 menuItems.map((item)=>(
 
+
 <NavLink
+
 key={item.path}
+
 to={item.path}
+
 onClick={()=>setOpen(false)}
 
-className={({isActive})=>
 
-`
+className={({isActive})=>`
+
 flex items-center gap-3
 p-3
 rounded-lg
@@ -98,13 +139,13 @@ isActive
 "hover:bg-gray-700"
 }
 
-`
-
-}
+`}
 
 >
 
+
 {item.icon}
+
 
 <span>
 {item.name}
@@ -113,7 +154,9 @@ isActive
 
 </NavLink>
 
+
 ))
+
 }
 
 
@@ -122,9 +165,11 @@ isActive
 
 </div>
 
+
 )
 
 }
+
 
 
 export default Sidebar;
