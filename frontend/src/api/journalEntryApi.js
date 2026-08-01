@@ -4,15 +4,23 @@ import axios from "./axios";
 const journalEntryApi = {
 
 
+    // ================= GET ALL =================
+
     getAll: async () => {
 
         const response =
-            await axios.get("/JournalEntry");
+            await axios.get(
+                "/JournalEntry"
+            );
 
         return response.data;
 
     },
 
+
+
+
+    // ================= GET BY ID =================
 
     getById: async (id) => {
 
@@ -25,6 +33,10 @@ const journalEntryApi = {
 
     },
 
+
+
+
+    // ================= CREATE =================
 
     create: async (data) => {
 
@@ -39,6 +51,10 @@ const journalEntryApi = {
     },
 
 
+
+
+    // ================= DELETE =================
+
     delete: async (id) => {
 
         const response =
@@ -49,6 +65,7 @@ const journalEntryApi = {
         return response.data;
 
     }
+
 
 
 };

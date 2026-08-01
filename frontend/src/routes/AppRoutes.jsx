@@ -60,6 +60,11 @@ import ChartOfAccounts from "../pages/chartOfAccounts/ChartOfAccounts";
 
 
 
+// ================= JOURNAL ENTRY =================
+
+import JournalEntry from "../pages/journalEntry/JournalEntry";
+
+
 
 
 
@@ -384,6 +389,35 @@ element={
 <MainLayout>
 
 <ChartOfAccounts />
+
+</MainLayout>
+
+</ProtectedRoute>
+
+}
+
+/>
+
+
+
+
+
+
+
+{/* ================= JOURNAL ENTRY ================= */}
+
+
+<Route
+
+path="/journal-entry"
+
+element={
+
+<ProtectedRoute>
+
+<MainLayout>
+
+<JournalEntry />
 
 </MainLayout>
 

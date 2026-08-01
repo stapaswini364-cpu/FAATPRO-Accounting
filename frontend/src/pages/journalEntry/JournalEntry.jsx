@@ -1,563 +1,115 @@
-import { Routes, Route } from "react-router-dom";
+import { useState } from "react";
 
+import {
+    Box,
+    Paper,
+    Typography,
+    Button,
+} from "@mui/material";
 
-import MainLayout from "../layouts/MainLayout";
-import ProtectedRoute from "../auth/ProtectedRoute";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 
+import JournalEntryList from "./JournalEntryList";
+import JournalEntryForm from "./components/JournalEntryForm";
 
-// ================= PUBLIC =================
 
-import Login from "../pages/Login";
-import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
 
+const JournalEntry = () => {
 
+    const [showForm, setShowForm] = useState(false);
 
-// ================= PROTECTED =================
 
-import Dashboard from "../pages/Dashboard";
-import Customers from "../pages/Customers";
-import Settings from "../pages/Settings";
-import Profile from "../pages/Profile";
-import ChangePassword from "../pages/ChangePassword";
+    return (
 
+        <Box sx={{ p: 3 }}>
 
+            <Paper
+                elevation={3}
+                sx={{ p: 3 }}
+            >
 
-// ================= COMPANY =================
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 3,
+                    }}
+                >
 
-import CompanyList from "../pages/company/CompanyList";
+                    <Typography
+                        variant="h4"
+                        fontWeight={600}
+                    >
+                        Journal Entry
+                    </Typography>
 
 
+                    {
+                        !showForm && (
 
-// ================= BRANCH =================
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() =>
+                                    setShowForm(true)
+                                }
+                            >
+                                New Voucher
+                            </Button>
 
-import BranchList from "../pages/branch/BranchList";
+                        )
+                    }
 
 
 
-// ================= FINANCIAL =================
+                    {
+                        showForm && (
 
-import FinancialYear from "../pages/financialYear";
+                            <Button
+                                variant="outlined"
+                                startIcon={<ArrowBackIcon />}
+                                onClick={() =>
+                                    setShowForm(false)
+                                }
+                            >
+                                Back
+                            </Button>
 
+                        )
+                    }
 
 
-// ================= ACCOUNT =================
+                </Box>
 
-import AccountHead from "../pages/accountHead";
 
-import AccountGroup from "../pages/accountGroup/AccountGroup";
 
-import AccountSubGroup from "../pages/accountSubGroup/AccountSubGroup";
+                {
+                    showForm ? (
 
-import Ledger from "../pages/ledger/Ledger";
+                        <JournalEntryForm
+                            onCancel={() =>
+                                setShowForm(false)
+                            }
+                        />
 
+                    ) : (
 
+                        <JournalEntryList />
 
-// ================= CHART =================
+                    )
+                }
 
-import ChartOfAccounts from "../pages/chartOfAccounts/ChartOfAccounts";
 
+            </Paper>
 
+        </Box>
 
-// ================= JOURNAL =================
-
-import JournalEntry from "../pages/journalEntry/JournalEntry";
-
-
-
-
-
-
-const AppRoutes = () => {
-
-
-return (
-
-<Routes>
-
-
-
-
-
-{/* ================= LOGIN ================= */}
-
-
-<Route
-
-path="/login"
-
-element={<Login />}
-
-/>
-
-
-
-<Route
-
-path="/forgot-password"
-
-element={<ForgotPassword />}
-
-/>
-
-
-
-<Route
-
-path="/reset-password"
-
-element={<ResetPassword />}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= DASHBOARD ================= */}
-
-
-<Route
-
-path="/"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<Dashboard />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= CUSTOMERS ================= */}
-
-
-<Route
-
-path="/customers"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<Customers />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= COMPANY ================= */}
-
-
-<Route
-
-path="/company"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<CompanyList />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= BRANCH ================= */}
-
-
-<Route
-
-path="/branch"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<BranchList />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= FINANCIAL YEAR ================= */}
-
-
-<Route
-
-path="/financial-year"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<FinancialYear />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= ACCOUNT HEAD ================= */}
-
-
-<Route
-
-path="/account-head"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<AccountHead />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= ACCOUNT GROUP ================= */}
-
-
-<Route
-
-path="/account-group"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<AccountGroup />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= ACCOUNT SUB GROUP ================= */}
-
-
-<Route
-
-path="/account-sub-group"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<AccountSubGroup />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= LEDGER ================= */}
-
-
-<Route
-
-path="/ledger"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<Ledger />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= CHART OF ACCOUNTS ================= */}
-
-
-<Route
-
-path="/chart-of-accounts"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<ChartOfAccounts />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= JOURNAL ENTRY ================= */}
-
-
-<Route
-
-path="/journal-entry"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<JournalEntry />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= SETTINGS ================= */}
-
-
-<Route
-
-path="/settings"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<Settings />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= PROFILE ================= */}
-
-
-<Route
-
-path="/profile"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<Profile />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= CHANGE PASSWORD ================= */}
-
-
-<Route
-
-path="/change-password"
-
-element={
-
-<ProtectedRoute>
-
-<MainLayout>
-
-<ChangePassword />
-
-</MainLayout>
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-
-
-
-
-
-{/* ================= DEFAULT ================= */}
-
-
-<Route
-
-path="*"
-
-element={<Login />}
-
-/>
-
-
-
-</Routes>
-
-
-);
-
+    );
 
 };
 
 
-export default AppRoutes;
+export default JournalEntry;
