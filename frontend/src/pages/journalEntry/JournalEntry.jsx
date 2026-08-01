@@ -60,6 +60,12 @@ import ChartOfAccounts from "../pages/chartOfAccounts/ChartOfAccounts";
 
 
 
+// ================= JOURNAL =================
+
+import JournalEntry from "../pages/journalEntry/JournalEntry";
+
+
+
 
 
 
@@ -69,6 +75,8 @@ const AppRoutes = () => {
 return (
 
 <Routes>
+
+
 
 
 
@@ -109,6 +117,7 @@ element={<ResetPassword />}
 
 
 
+
 {/* ================= DASHBOARD ================= */}
 
 
@@ -131,6 +140,7 @@ element={
 }
 
 />
+
 
 
 
@@ -167,6 +177,7 @@ element={
 
 
 
+
 {/* ================= COMPANY ================= */}
 
 
@@ -189,6 +200,7 @@ element={
 }
 
 />
+
 
 
 
@@ -225,6 +237,7 @@ element={
 
 
 
+
 {/* ================= FINANCIAL YEAR ================= */}
 
 
@@ -247,6 +260,7 @@ element={
 }
 
 />
+
 
 
 
@@ -283,6 +297,7 @@ element={
 
 
 
+
 {/* ================= ACCOUNT GROUP ================= */}
 
 
@@ -305,6 +320,7 @@ element={
 }
 
 />
+
 
 
 
@@ -341,6 +357,7 @@ element={
 
 
 
+
 {/* ================= LEDGER ================= */}
 
 
@@ -363,6 +380,7 @@ element={
 }
 
 />
+
 
 
 
@@ -399,6 +417,37 @@ element={
 
 
 
+
+{/* ================= JOURNAL ENTRY ================= */}
+
+
+<Route
+
+path="/journal-entry"
+
+element={
+
+<ProtectedRoute>
+
+<MainLayout>
+
+<JournalEntry />
+
+</MainLayout>
+
+</ProtectedRoute>
+
+}
+
+/>
+
+
+
+
+
+
+
+
 {/* ================= SETTINGS ================= */}
 
 
@@ -421,6 +470,7 @@ element={
 }
 
 />
+
 
 
 
@@ -457,6 +507,7 @@ element={
 
 
 
+
 {/* ================= CHANGE PASSWORD ================= */}
 
 
@@ -479,6 +530,7 @@ element={
 }
 
 />
+
 
 
 

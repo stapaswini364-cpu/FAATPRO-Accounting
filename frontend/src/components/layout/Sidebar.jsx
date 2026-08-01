@@ -13,6 +13,9 @@ import {
     People,
     Business,
     AccountTree,
+    CalendarMonth,
+    AccountBalance,
+    ReceiptLong,
     Settings
 } from "@mui/icons-material";
 
@@ -52,6 +55,41 @@ const menuItems = [
 
 
     {
+        title: "Financial Year",
+        path: "/financial-year",
+        icon: <CalendarMonth />
+    },
+
+
+    {
+        title: "Account Head",
+        path: "/account-head",
+        icon: <AccountBalance />
+    },
+
+
+    {
+        title: "Account Group",
+        path: "/account-group",
+        icon: <AccountBalance />
+    },
+
+
+    {
+        title: "Account Sub Group",
+        path: "/account-sub-group",
+        icon: <AccountBalance />
+    },
+
+
+    {
+        title: "Ledger",
+        path: "/ledger",
+        icon: <ReceiptLong />
+    },
+
+
+    {
         title: "Settings",
         path: "/settings",
         icon: <Settings />
@@ -62,9 +100,9 @@ const menuItems = [
 
 
 
+
 export default function Sidebar()
 {
-
 
     const navigate = useNavigate();
 
@@ -108,9 +146,12 @@ export default function Sidebar()
 
                         >
 
+
                             <ListItemButton
 
-                                onClick={()=>navigate(item.path)}
+                                onClick={() =>
+                                    navigate(item.path)
+                                }
 
                             >
 
@@ -137,7 +178,6 @@ export default function Sidebar()
 
 
                     ))
-
                 }
 
 
