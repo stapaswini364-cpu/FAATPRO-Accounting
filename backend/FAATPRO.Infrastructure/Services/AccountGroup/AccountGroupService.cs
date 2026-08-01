@@ -30,6 +30,8 @@ public class AccountGroupService : IAccountGroupService
 
         return await _context.AccountGroups
 
+            .Include(x => x.AccountHead)
+
             .OrderBy(x => x.DisplayOrder)
 
             .Select(x => new AccountGroupResponse
@@ -41,9 +43,17 @@ public class AccountGroupService : IAccountGroupService
 
                 Name = x.Name,
 
+
+                AccountHeadId = x.AccountHeadId,
+
+                AccountHeadName = x.AccountHead.Name,
+
+
                 Nature = x.Nature,
 
                 DisplayOrder = x.DisplayOrder,
+
+                IsSystem = x.IsSystem,
 
                 IsActive = x.IsActive,
 
@@ -58,15 +68,20 @@ public class AccountGroupService : IAccountGroupService
 
 
 
+
     public async Task<AccountGroupResponse?> GetByIdAsync(Guid id)
     {
 
         var group =
             await _context.AccountGroups
+
+            .Include(x => x.AccountHead)
+
             .FirstOrDefaultAsync(x => x.Id == id);
 
 
-        if(group == null)
+
+        if (group == null)
             return null;
 
 
@@ -80,9 +95,17 @@ public class AccountGroupService : IAccountGroupService
 
             Name = group.Name,
 
+
+            AccountHeadId = group.AccountHeadId,
+
+            AccountHeadName = group.AccountHead.Name,
+
+
             Nature = group.Nature,
 
             DisplayOrder = group.DisplayOrder,
+
+            IsSystem = group.IsSystem,
 
             IsActive = group.IsActive,
 
@@ -100,10 +123,26 @@ public class AccountGroupService : IAccountGroupService
         CreateAccountGroupRequest request)
     {
 
+        var accountHeadExists =
+            await _context.AccountHeads
+            .AnyAsync(x => x.Id == request.AccountHeadId);
+
+
+
+        if (!accountHeadExists)
+        {
+            throw new Exception(
+                "Invalid AccountHeadId. Account Head not found.");
+        }
+
+
+
         var group = new AccountGroupEntity
         {
 
             Id = Guid.NewGuid(),
+
+            AccountHeadId = request.AccountHeadId,
 
             Code = request.Code,
 
@@ -113,6 +152,8 @@ public class AccountGroupService : IAccountGroupService
 
             DisplayOrder = request.DisplayOrder,
 
+            IsSystem = request.IsSystem,
+
             IsActive = request.IsActive,
 
             CreatedOn = DateTime.UtcNow
@@ -120,18 +161,19 @@ public class AccountGroupService : IAccountGroupService
         };
 
 
-        await _context.AccountGroups.AddAsync(group);
 
+        await _context.AccountGroups.AddAsync(group);
 
         await _context.SaveChangesAsync();
 
 
+
         return await GetByIdAsync(group.Id)
+
             ?? throw new Exception(
                 "Account Group creation failed");
 
     }
-
 
 
 
@@ -148,10 +190,12 @@ public class AccountGroupService : IAccountGroupService
 
 
 
-        if(group == null)
+        if (group == null)
             return false;
 
 
+
+        group.AccountHeadId = request.AccountHeadId;
 
         group.Code = request.Code;
 
@@ -160,6 +204,8 @@ public class AccountGroupService : IAccountGroupService
         group.Nature = request.Nature;
 
         group.DisplayOrder = request.DisplayOrder;
+
+        group.IsSystem = request.IsSystem;
 
         group.IsActive = request.IsActive;
 
@@ -176,7 +222,6 @@ public class AccountGroupService : IAccountGroupService
 
 
 
-
     public async Task<bool> DeleteAsync(Guid id)
     {
 
@@ -186,7 +231,7 @@ public class AccountGroupService : IAccountGroupService
 
 
 
-        if(group == null)
+        if (group == null)
             return false;
 
 

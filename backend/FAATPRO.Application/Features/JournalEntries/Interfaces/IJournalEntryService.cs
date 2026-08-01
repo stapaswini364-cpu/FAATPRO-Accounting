@@ -4,22 +4,17 @@ namespace FAATPRO.Application.Features.JournalEntries.Interfaces;
 
 public interface IJournalEntryService
 {
+
     Task<List<JournalEntryResponse>> GetAllAsync();
 
 
-    Task<JournalEntryResponse?> GetByIdAsync(
-        Guid id);
+    Task<JournalEntryResponse?> GetByIdAsync(Guid id);
 
 
     Task<JournalEntryResponse> CreateAsync(
         CreateJournalEntryRequest request);
 
 
-    Task<bool> UpdateAsync(
-        Guid id,
-        CreateJournalEntryRequest request);
+    Task<bool> DeleteAsync(Guid id);
 
-
-    Task<bool> DeleteAsync(
-        Guid id);
 }

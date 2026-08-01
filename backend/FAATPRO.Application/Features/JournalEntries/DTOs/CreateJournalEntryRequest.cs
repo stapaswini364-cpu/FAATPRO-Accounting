@@ -21,16 +21,13 @@ public class CreateJournalEntryRequest
 }
 
 
-
 public class JournalEntryDetailRequest
 {
     public Guid LedgerId { get; set; }
 
-
     public decimal Debit { get; set; }
 
     public decimal Credit { get; set; }
-
 
     public string? Narration { get; set; }
 }

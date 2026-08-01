@@ -1,5 +1,5 @@
-using FAATPRO.Application.Features.FinancialYears.DTOs;
-using FAATPRO.Application.Features.FinancialYears.Interfaces;
+using FAATPRO.Application.Features.FinancialYear.DTOs;
+using FAATPRO.Application.Features.FinancialYear.Interfaces;
 
 using FinancialYearEntity = FAATPRO.Domain.Entities.FinancialYear;
 
@@ -7,23 +7,17 @@ using FAATPRO.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 
-
 namespace FAATPRO.Infrastructure.Services.FinancialYear;
-
 
 public class FinancialYearService : IFinancialYearService
 {
-
     private readonly ApplicationDbContext _context;
-
 
     public FinancialYearService(
         ApplicationDbContext context)
     {
         _context = context;
     }
-
-
 
     public async Task<List<FinancialYearResponse>> GetAllAsync()
     {
@@ -41,29 +35,24 @@ public class FinancialYearService : IFinancialYearService
 
                 EndDate = x.EndDate,
 
-                IsCurrent = x.IsCurrent
+                IsCurrent = x.IsCurrent,
+
+                IsClosed = x.IsClosed
 
             })
 
             .ToListAsync();
     }
 
-
-
-
     public async Task<FinancialYearResponse?> GetByIdAsync(
         Guid id)
     {
-
         var year =
             await _context.FinancialYears
             .FirstOrDefaultAsync(x => x.Id == id);
 
-
         if (year == null)
             return null;
-
-
 
         return new FinancialYearResponse
         {
@@ -77,18 +66,15 @@ public class FinancialYearService : IFinancialYearService
 
             EndDate = year.EndDate,
 
-            IsCurrent = year.IsCurrent
+            IsCurrent = year.IsCurrent,
+
+            IsClosed = year.IsClosed
         };
     }
-
-
-
-
 
     public async Task<FinancialYearResponse> CreateAsync(
         CreateFinancialYearRequest request)
     {
-
         var year = new FinancialYearEntity
         {
             Id = Guid.NewGuid(),
@@ -101,38 +87,53 @@ public class FinancialYearService : IFinancialYearService
 
             EndDate = request.EndDate,
 
-            IsCurrent = request.IsCurrent
+            IsCurrent = request.IsCurrent,
+
+            IsClosed = false
         };
 
+        if (request.IsCurrent)
+        {
+            var currentYears = await _context.FinancialYears
+                .Where(x => x.CompanyId == request.CompanyId)
+                .ToListAsync();
+
+            foreach (var item in currentYears)
+            {
+                item.IsCurrent = false;
+            }
+        }
 
         await _context.FinancialYears.AddAsync(year);
 
         await _context.SaveChangesAsync();
 
-
         return await GetByIdAsync(year.Id)
-            ?? throw new Exception(
-                "Financial year creation failed");
+            ?? throw new Exception("Financial year creation failed.");
     }
-
-
-
-
 
     public async Task<bool> UpdateAsync(
         Guid id,
         CreateFinancialYearRequest request)
     {
-
         var year =
             await _context.FinancialYears
             .FirstOrDefaultAsync(x => x.Id == id);
 
-
         if (year == null)
             return false;
 
+        if (request.IsCurrent)
+        {
+            var currentYears = await _context.FinancialYears
+                .Where(x => x.CompanyId == request.CompanyId && x.Id != id)
+                .ToListAsync();
 
+            foreach (var item in currentYears)
+            {
+                item.IsCurrent = false;
+            }
+        }
 
         year.CompanyId = request.CompanyId;
 
@@ -144,39 +145,42 @@ public class FinancialYearService : IFinancialYearService
 
         year.IsCurrent = request.IsCurrent;
 
-
-
         await _context.SaveChangesAsync();
-
 
         return true;
     }
-
-
-
-
 
     public async Task<bool> DeleteAsync(
         Guid id)
     {
-
         var year =
             await _context.FinancialYears
             .FirstOrDefaultAsync(x => x.Id == id);
 
-
         if (year == null)
             return false;
 
-
-
         _context.FinancialYears.Remove(year);
 
-
         await _context.SaveChangesAsync();
-
 
         return true;
     }
 
+    public async Task<bool> CloseAsync(
+        Guid id)
+    {
+        var year =
+            await _context.FinancialYears
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (year == null)
+            return false;
+
+        year.IsClosed = true;
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
 }

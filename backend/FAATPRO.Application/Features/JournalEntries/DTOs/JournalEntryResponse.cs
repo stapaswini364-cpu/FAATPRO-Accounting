@@ -31,12 +31,11 @@ public class JournalEntryResponse
 }
 
 
-
 public class JournalEntryDetailResponse
 {
-    public Guid Id { get; set; }
-
     public Guid LedgerId { get; set; }
+
+    public string LedgerName { get; set; } = null!;
 
     public decimal Debit { get; set; }
 

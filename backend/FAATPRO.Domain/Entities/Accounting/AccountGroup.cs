@@ -1,13 +1,10 @@
 using FAATPRO.Domain.Common;
 using FAATPRO.Domain.Enums;
 
-
 namespace FAATPRO.Domain.Entities.Accounting;
-
 
 public class AccountGroup : BaseEntity
 {
-
     public string Code { get; set; } = null!;
 
 
@@ -24,10 +21,13 @@ public class AccountGroup : BaseEntity
     public int DisplayOrder { get; set; }
 
 
+    public bool IsSystem { get; set; }
+
+
     public bool IsActive { get; set; } = true;
 
 
-    public DateTime CreatedOn { get; set; }
+    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
 
     public Guid? CreatedBy { get; set; }
@@ -41,7 +41,5 @@ public class AccountGroup : BaseEntity
 
 
     // Navigation
-
     public AccountHead AccountHead { get; set; } = null!;
-
 }

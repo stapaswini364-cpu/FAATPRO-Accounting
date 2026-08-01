@@ -24,13 +24,21 @@ using FAATPRO.Application.Features.Customers.Interfaces;
 
 using FAATPRO.Application.Features.Companies.Interfaces;
 using FAATPRO.Application.Features.Branches.Interfaces;
-using FAATPRO.Application.Features.FinancialYears.Interfaces;
+using FAATPRO.Application.Features.FinancialYear.Interfaces;
 using FAATPRO.Application.Features.Currencies.Interfaces;
 using FAATPRO.Application.Features.Cities.Interfaces;
+
+
 using FAATPRO.Application.Features.AccountHeads.Interfaces;
 using FAATPRO.Application.Features.AccountGroups.Interfaces;
+using FAATPRO.Application.Features.AccountSubGroups.Interfaces;
+
 using FAATPRO.Application.Features.Dashboard.Interfaces;
 using FAATPRO.Application.Features.Ledgers.Interfaces;
+
+// JOURNAL ENTRY
+using FAATPRO.Application.Features.JournalEntries.Interfaces;
+
 
 
 using FAATPRO.Infrastructure.Authentication;
@@ -40,16 +48,25 @@ using FAATPRO.Infrastructure.Persistence;
 
 using FAATPRO.Infrastructure.Services;
 using FAATPRO.Infrastructure.Services.RolePermissions;
+
 using FAATPRO.Infrastructure.Services.Company;
 using FAATPRO.Infrastructure.Services.Branch;
 using FAATPRO.Infrastructure.Services.FinancialYear;
 using FAATPRO.Infrastructure.Services.Currency;
 using FAATPRO.Infrastructure.Services.City;
+
+
 using FAATPRO.Infrastructure.Services.AccountHead;
 using FAATPRO.Infrastructure.Services.AccountGroup;
+using FAATPRO.Infrastructure.Services.AccountSubGroup;
+
+
 using FAATPRO.Infrastructure.Services.Customer;
 using FAATPRO.Infrastructure.Services.Dashboard;
 using FAATPRO.Infrastructure.Services.Ledger;
+
+// JOURNAL ENTRY
+using FAATPRO.Infrastructure.Services.JournalEntry;
 
 
 using FAATPRO.Infrastructure.Authorization;
@@ -68,10 +85,6 @@ public static class DependencyInjection
     {
 
 
-        // ==============================
-        // DATABASE
-        // ==============================
-
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(
@@ -80,12 +93,6 @@ public static class DependencyInjection
         });
 
 
-
-
-
-        // ==============================
-        // JWT SETTINGS
-        // ==============================
 
         services.Configure<JwtSettings>(
             configuration.GetSection("JwtSettings"));
@@ -99,7 +106,7 @@ public static class DependencyInjection
 
 
 
-        if (jwtSettings == null)
+        if(jwtSettings == null)
         {
             throw new Exception(
                 "JwtSettings configuration missing");
@@ -107,12 +114,9 @@ public static class DependencyInjection
 
 
 
-
-
-
-        // ==============================
-        // AUTH SERVICES
-        // ==============================
+        // ==========================
+        // AUTH
+        // ==========================
 
         services.AddScoped<
             IJwtTokenGenerator,
@@ -127,10 +131,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // USER MODULE
-        // ==============================
+        // ==========================
+        // USER
+        // ==========================
 
         services.AddScoped<
             IUserService,
@@ -140,10 +143,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // ROLE MODULE
-        // ==============================
+        // ==========================
+        // ROLE
+        // ==========================
 
         services.AddScoped<
             IRoleService,
@@ -153,10 +155,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // PERMISSION MODULE
-        // ==============================
+        // ==========================
+        // PERMISSION
+        // ==========================
 
         services.AddScoped<
             IPermissionService,
@@ -166,10 +167,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // ROLE PERMISSION MODULE
-        // ==============================
+        // ==========================
+        // ROLE PERMISSION
+        // ==========================
 
         services.AddScoped<
             IRolePermissionService,
@@ -179,10 +179,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // COMPANY MODULE
-        // ==============================
+        // ==========================
+        // COMPANY
+        // ==========================
 
         services.AddScoped<
             ICompanyService,
@@ -192,10 +191,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // BRANCH MODULE
-        // ==============================
+        // ==========================
+        // BRANCH
+        // ==========================
 
         services.AddScoped<
             IBranchService,
@@ -205,10 +203,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // FINANCIAL YEAR MODULE
-        // ==============================
+        // ==========================
+        // FINANCIAL YEAR
+        // ==========================
 
         services.AddScoped<
             IFinancialYearService,
@@ -218,10 +215,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // CURRENCY MODULE
-        // ==============================
+        // ==========================
+        // CURRENCY
+        // ==========================
 
         services.AddScoped<
             ICurrencyService,
@@ -231,10 +227,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // CITY MODULE
-        // ==============================
+        // ==========================
+        // CITY
+        // ==========================
 
         services.AddScoped<
             ICityService,
@@ -244,10 +239,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // ACCOUNT HEAD MODULE
-        // ==============================
+        // ==========================
+        // ACCOUNT HEAD
+        // ==========================
 
         services.AddScoped<
             IAccountHeadService,
@@ -257,10 +251,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // ACCOUNT GROUP MODULE
-        // ==============================
+        // ==========================
+        // ACCOUNT GROUP
+        // ==========================
 
         services.AddScoped<
             IAccountGroupService,
@@ -270,10 +263,21 @@ public static class DependencyInjection
 
 
 
+        // ==========================
+        // ACCOUNT SUB GROUP
+        // ==========================
 
-        // ==============================
-        // CUSTOMER MODULE
-        // ==============================
+        services.AddScoped<
+            IAccountSubGroupService,
+            AccountSubGroupService>();
+
+
+
+
+
+        // ==========================
+        // CUSTOMER
+        // ==========================
 
         services.AddScoped<
             ICustomerService,
@@ -283,10 +287,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // DASHBOARD MODULE
-        // ==============================
+        // ==========================
+        // DASHBOARD
+        // ==========================
 
         services.AddScoped<
             IDashboardService,
@@ -296,10 +299,9 @@ public static class DependencyInjection
 
 
 
-
-        // ==============================
-        // LEDGER MODULE
-        // ==============================
+        // ==========================
+        // LEDGER
+        // ==========================
 
         services.AddScoped<
             ILedgerService,
@@ -309,12 +311,23 @@ public static class DependencyInjection
 
 
 
+        // ==========================
+        // JOURNAL ENTRY
+        // ==========================
+
+        services.AddScoped<
+            IJournalEntryService,
+            JournalEntryService>();
 
 
 
-        // ==============================
+
+
+
+
+        // ==========================
         // JWT AUTHENTICATION
-        // ==============================
+        // ==========================
 
         services.AddAuthentication(
             JwtBearerDefaults.AuthenticationScheme)
@@ -325,7 +338,6 @@ public static class DependencyInjection
             options.RequireHttpsMetadata = false;
 
             options.SaveToken = true;
-
 
 
             options.TokenValidationParameters =
@@ -362,27 +374,24 @@ public static class DependencyInjection
 
 
 
-
-
-
-        // ==============================
-        // AUTHORIZATION + RBAC
-        // ==============================
-
         services.AddAuthorization();
 
 
+
+
+
+        // ==========================
+        // RBAC PERMISSION
+        // ==========================
 
         services.AddSingleton<
             IAuthorizationPolicyProvider,
             PermissionPolicyProvider>();
 
 
-
         services.AddScoped<
             IAuthorizationHandler,
             PermissionAuthorizationHandler>();
-
 
 
 

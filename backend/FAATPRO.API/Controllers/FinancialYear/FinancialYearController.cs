@@ -1,5 +1,5 @@
-using FAATPRO.Application.Features.FinancialYears.DTOs;
-using FAATPRO.Application.Features.FinancialYears.Interfaces;
+using FAATPRO.Application.Features.FinancialYear.DTOs;
+using FAATPRO.Application.Features.FinancialYear.Interfaces;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +24,7 @@ public class FinancialYearController : ControllerBase
 
 
 
-
+    // GET: api/FinancialYear
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -37,25 +37,29 @@ public class FinancialYearController : ControllerBase
 
 
 
+    // GET: api/FinancialYear/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(
         Guid id)
     {
+
         var result =
             await _service.GetByIdAsync(id);
 
 
-        if(result == null)
+        if (result == null)
             return NotFound();
 
 
         return Ok(result);
+
     }
 
 
 
 
 
+    // POST: api/FinancialYear
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateFinancialYearRequest request)
@@ -68,15 +72,20 @@ public class FinancialYearController : ControllerBase
         return Ok(new
         {
             Success = true,
-            Message = "Financial Year created successfully.",
+
+            Message =
+                "Financial Year created successfully.",
+
             Data = result
         });
+
     }
 
 
 
 
 
+    // PUT: api/FinancialYear/{id}
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         Guid id,
@@ -87,21 +96,25 @@ public class FinancialYearController : ControllerBase
             await _service.UpdateAsync(id, request);
 
 
-        if(!result)
+        if (!result)
             return NotFound();
 
 
         return Ok(new
         {
             Success = true,
-            Message = "Financial Year updated successfully."
+
+            Message =
+                "Financial Year updated successfully."
         });
+
     }
 
 
 
 
 
+    // DELETE: api/FinancialYear/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(
         Guid id)
@@ -111,15 +124,18 @@ public class FinancialYearController : ControllerBase
             await _service.DeleteAsync(id);
 
 
-        if(!result)
+        if (!result)
             return NotFound();
 
 
         return Ok(new
         {
             Success = true,
-            Message = "Financial Year deleted successfully."
+
+            Message =
+                "Financial Year deleted successfully."
         });
+
     }
 
 }

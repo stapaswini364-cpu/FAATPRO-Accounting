@@ -1,14 +1,15 @@
 using FAATPRO.Application.Features.JournalEntries.DTOs;
 using FAATPRO.Application.Features.JournalEntries.Interfaces;
 
-using FAATPRO.Domain.Entities.Accounting;
+using JournalEntryEntity = FAATPRO.Domain.Entities.Accounting.JournalEntry;
+using JournalEntryDetailEntity = FAATPRO.Domain.Entities.Accounting.JournalEntryDetail;
 
 using FAATPRO.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 
 
-namespace FAATPRO.Infrastructure.Services.JournalEntries;
+namespace FAATPRO.Infrastructure.Services.JournalEntry;
 
 
 public class JournalEntryService : IJournalEntryService
@@ -25,13 +26,19 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-
     public async Task<List<JournalEntryResponse>> GetAllAsync()
     {
+
         return await _context.JournalEntries
+
             .Include(x => x.Details)
+            .ThenInclude(x => x.Ledger)
+
+            .OrderByDescending(x => x.VoucherDate)
+
             .Select(x => new JournalEntryResponse
             {
+
                 Id = x.Id,
 
                 VoucherNo = x.VoucherNo,
@@ -53,37 +60,38 @@ public class JournalEntryService : IJournalEntryService
                 CreatedOn = x.CreatedOn,
 
 
-                Details = x.Details
-                    .Select(d => new JournalEntryDetailResponse
-                    {
-                        Id = d.Id,
+                Details = x.Details.Select(d => new JournalEntryDetailResponse
+                {
+                    LedgerId = d.LedgerId,
 
-                        LedgerId = d.LedgerId,
+                    LedgerName = d.Ledger.Name,
 
-                        Debit = d.Debit,
+                    Debit = d.Debit,
 
-                        Credit = d.Credit,
+                    Credit = d.Credit,
 
-                        Narration = d.Narration
+                    Narration = d.Narration
 
-                    })
-                    .ToList()
+                }).ToList()
 
             })
+
             .ToListAsync();
+
     }
 
 
 
 
 
-
-    public async Task<JournalEntryResponse?> GetByIdAsync(
-        Guid id)
+    public async Task<JournalEntryResponse?> GetByIdAsync(Guid id)
     {
 
         var entry = await _context.JournalEntries
+
             .Include(x => x.Details)
+            .ThenInclude(x => x.Ledger)
+
             .FirstOrDefaultAsync(x => x.Id == id);
 
 
@@ -93,7 +101,47 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-        return MapResponse(entry);
+        return new JournalEntryResponse
+        {
+
+            Id = entry.Id,
+
+            VoucherNo = entry.VoucherNo,
+
+            VoucherDate = entry.VoucherDate,
+
+            ReferenceNo = entry.ReferenceNo,
+
+            Narration = entry.Narration,
+
+            TotalDebit = entry.TotalDebit,
+
+            TotalCredit = entry.TotalCredit,
+
+            CompanyId = entry.CompanyId,
+
+            FinancialYearId = entry.FinancialYearId,
+
+            CreatedOn = entry.CreatedOn,
+
+
+            Details = entry.Details.Select(d => new JournalEntryDetailResponse
+            {
+
+                LedgerId = d.LedgerId,
+
+                LedgerName = d.Ledger.Name,
+
+                Debit = d.Debit,
+
+                Credit = d.Credit,
+
+                Narration = d.Narration
+
+            }).ToList()
+
+        };
+
     }
 
 
@@ -106,11 +154,12 @@ public class JournalEntryService : IJournalEntryService
         CreateJournalEntryRequest request)
     {
 
-        decimal totalDebit =
+
+        var totalDebit =
             request.Details.Sum(x => x.Debit);
 
 
-        decimal totalCredit =
+        var totalCredit =
             request.Details.Sum(x => x.Credit);
 
 
@@ -118,12 +167,14 @@ public class JournalEntryService : IJournalEntryService
         if (totalDebit != totalCredit)
         {
             throw new Exception(
-                "Debit and Credit must be equal");
+                "Debit and Credit must be equal.");
         }
 
 
 
-        var entry = new FAATPRO.Domain.Entities.Accounting.JournalEntry
+
+
+        var entry = new JournalEntryEntity
         {
 
             Id = Guid.NewGuid(),
@@ -136,139 +187,58 @@ public class JournalEntryService : IJournalEntryService
 
             Narration = request.Narration,
 
+            TotalDebit = totalDebit,
+
+            TotalCredit = totalCredit,
 
             CompanyId = request.CompanyId,
 
             FinancialYearId = request.FinancialYearId,
 
-
-            TotalDebit = totalDebit,
-
-            TotalCredit = totalCredit,
-
-
-            CreatedOn = DateTime.UtcNow,
-
-
-
-            Details = request.Details
-                .Select(x => new JournalEntryDetail
-                {
-
-                    Id = Guid.NewGuid(),
-
-                    LedgerId = x.LedgerId,
-
-                    Debit = x.Debit,
-
-                    Credit = x.Credit,
-
-                    Narration = x.Narration
-
-                })
-                .ToList()
+            CreatedOn = DateTime.UtcNow
 
         };
 
 
 
-        _context.JournalEntries.Add(entry);
 
 
-        await _context.SaveChangesAsync();
-
-
-
-        return MapResponse(entry);
-
-    }
-
-
-
-
-
-
-
-
-    public async Task<bool> UpdateAsync(
-        Guid id,
-        CreateJournalEntryRequest request)
-    {
-
-        var entry = await _context.JournalEntries
-            .Include(x => x.Details)
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-
-
-        if (entry == null)
-            return false;
-
-
-
-        decimal totalDebit =
-            request.Details.Sum(x => x.Debit);
-
-
-        decimal totalCredit =
-            request.Details.Sum(x => x.Credit);
-
-
-
-        if (totalDebit != totalCredit)
+        foreach(var item in request.Details)
         {
-            throw new Exception(
-                "Debit and Credit must be equal");
+
+            entry.Details.Add(
+                new JournalEntryDetailEntity
+                {
+
+                    Id = Guid.NewGuid(),
+
+                    LedgerId = item.LedgerId,
+
+                    Debit = item.Debit,
+
+                    Credit = item.Credit,
+
+                    Narration = item.Narration
+
+                });
+
         }
 
 
 
-        entry.VoucherNo = request.VoucherNo;
-
-        entry.VoucherDate = request.VoucherDate;
-
-        entry.ReferenceNo = request.ReferenceNo;
-
-        entry.Narration = request.Narration;
 
 
-        entry.TotalDebit = totalDebit;
-
-        entry.TotalCredit = totalCredit;
-
-
-
-        _context.JournalEntryDetails
-            .RemoveRange(entry.Details);
-
-
-
-        entry.Details =
-            request.Details
-            .Select(x => new JournalEntryDetail
-            {
-
-                Id = Guid.NewGuid(),
-
-                JournalEntryId = entry.Id,
-
-                LedgerId = x.LedgerId,
-
-                Debit = x.Debit,
-
-                Credit = x.Credit,
-
-                Narration = x.Narration
-
-            })
-            .ToList();
-
+        await _context.JournalEntries.AddAsync(entry);
 
 
         await _context.SaveChangesAsync();
 
 
-        return true;
+
+        return await GetByIdAsync(entry.Id)
+
+            ?? throw new Exception(
+                "Journal Entry failed");
 
     }
 
@@ -278,17 +248,16 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-
-    public async Task<bool> DeleteAsync(
-        Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
 
-        var entry = await _context.JournalEntries
+        var entry =
+            await _context.JournalEntries
             .FirstOrDefaultAsync(x => x.Id == id);
 
 
 
-        if (entry == null)
+        if(entry == null)
             return false;
 
 
@@ -300,72 +269,6 @@ public class JournalEntryService : IJournalEntryService
 
 
         return true;
-
-    }
-
-
-
-
-
-
-
-
-    private static JournalEntryResponse MapResponse(
-        FAATPRO.Domain.Entities.Accounting.JournalEntry x)
-    {
-
-        return new JournalEntryResponse
-        {
-
-            Id = x.Id,
-
-
-            VoucherNo = x.VoucherNo,
-
-
-            VoucherDate = x.VoucherDate,
-
-
-            ReferenceNo = x.ReferenceNo,
-
-
-            Narration = x.Narration,
-
-
-            TotalDebit = x.TotalDebit,
-
-
-            TotalCredit = x.TotalCredit,
-
-
-            CompanyId = x.CompanyId,
-
-
-            FinancialYearId = x.FinancialYearId,
-
-
-            CreatedOn = x.CreatedOn,
-
-
-
-            Details = x.Details
-                .Select(d => new JournalEntryDetailResponse
-                {
-
-                    Id = d.Id,
-
-                    LedgerId = d.LedgerId,
-
-                    Debit = d.Debit,
-
-                    Credit = d.Credit,
-
-                    Narration = d.Narration
-
-                })
-                .ToList()
-
-        };
 
     }
 
