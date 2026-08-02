@@ -23,6 +23,7 @@ public class JournalEntryController : ControllerBase
 
 
 
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -30,9 +31,11 @@ public class JournalEntryController : ControllerBase
         var result =
             await _service.GetAllAsync();
 
+
         return Ok(result);
 
     }
+
 
 
 
@@ -58,16 +61,28 @@ public class JournalEntryController : ControllerBase
 
 
 
+
     [HttpPost]
     public async Task<IActionResult> Create(
-        CreateJournalEntryRequest request)
+        [FromBody] CreateJournalEntryRequest request)
     {
 
         try
         {
 
+            Console.WriteLine(
+                "Journal Entry Create Started"
+            );
+
+
             var result =
                 await _service.CreateAsync(request);
+
+
+
+            Console.WriteLine(
+                "Journal Entry Created Successfully"
+            );
 
 
             return Ok(result);
@@ -76,15 +91,69 @@ public class JournalEntryController : ControllerBase
         catch(Exception ex)
         {
 
-            return BadRequest(
-                new
-                {
-                    message = ex.Message
-                });
+            Console.WriteLine(
+                "========== JOURNAL ERROR =========="
+            );
+
+
+            Console.WriteLine(
+                ex.ToString()
+            );
+
+
+            return BadRequest(new
+            {
+                message = ex.Message,
+
+                inner =
+                ex.InnerException?.Message
+            });
 
         }
 
     }
+
+
+
+
+
+
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+        Guid id,
+        [FromBody] CreateJournalEntryRequest request)
+    {
+
+        try
+        {
+
+            var result =
+                await _service.UpdateAsync(
+                    id,
+                    request
+                );
+
+
+            return Ok(result);
+
+        }
+        catch(Exception ex)
+        {
+
+            return BadRequest(new
+            {
+                message = ex.Message,
+
+                inner =
+                ex.InnerException?.Message
+            });
+
+        }
+
+    }
+
+
 
 
 
@@ -99,16 +168,19 @@ public class JournalEntryController : ControllerBase
             await _service.DeleteAsync(id);
 
 
+
         if(!result)
             return NotFound();
 
 
-        return Ok(
-            new
-            {
-                message = "Journal Entry deleted"
-            });
+
+        return Ok(new
+        {
+            message =
+            "Journal Entry deleted"
+        });
 
     }
+
 
 }

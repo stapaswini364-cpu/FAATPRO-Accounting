@@ -10,7 +10,10 @@ public class Ledger : BaseEntity
     public string Name { get; set; } = null!;
 
 
+
+    // ==========================
     // Account Hierarchy
+    // ==========================
 
     public Guid AccountHeadId { get; set; }
 
@@ -20,7 +23,9 @@ public class Ledger : BaseEntity
 
 
 
+    // ==========================
     // Opening Balance
+    // ==========================
 
     public decimal OpeningBalance { get; set; }
 
@@ -28,7 +33,17 @@ public class Ledger : BaseEntity
 
 
 
+    // ==========================
+    // Ledger Running Balance
+    // ==========================
+
+    public decimal CurrentBalance { get; set; }
+
+
+
+    // ==========================
     // Contact Details
+    // ==========================
 
     public string? Address { get; set; }
 
@@ -38,14 +53,25 @@ public class Ledger : BaseEntity
 
 
 
+    // ==========================
     // Tax Details
+    // ==========================
 
     public string? GSTIN { get; set; }
 
 
 
+    // ==========================
+    // Status
+    // ==========================
+
     public bool IsActive { get; set; } = true;
 
+
+
+    // ==========================
+    // Audit Fields
+    // ==========================
 
     public DateTime CreatedOn { get; set; }
 
@@ -57,11 +83,23 @@ public class Ledger : BaseEntity
 
 
 
-    // Navigation
+    // ==========================
+    // Navigation Properties
+    // ==========================
 
     public AccountHead AccountHead { get; set; } = null!;
 
     public AccountGroup AccountGroup { get; set; } = null!;
 
     public AccountSubGroup? AccountSubGroup { get; set; }
+
+
+
+    // ==========================
+    // Journal Entry Relation
+    // ==========================
+
+    public ICollection<JournalEntryDetail> JournalEntryDetails { get; set; }
+        = new List<JournalEntryDetail>();
+
 }

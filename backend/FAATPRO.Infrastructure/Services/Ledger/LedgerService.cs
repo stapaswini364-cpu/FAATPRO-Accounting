@@ -13,6 +13,7 @@ namespace FAATPRO.Infrastructure.Services.Ledger;
 
 public class LedgerService : ILedgerService
 {
+
     private readonly ApplicationDbContext _context;
 
 
@@ -23,11 +24,17 @@ public class LedgerService : ILedgerService
 
 
 
+
+
+
     public async Task<List<LedgerResponse>> GetAllAsync()
     {
+
         return await _context.Ledgers
+
             .Select(x => new LedgerResponse
             {
+
                 Id = x.Id,
 
                 Code = x.Code,
@@ -60,9 +67,16 @@ public class LedgerService : ILedgerService
 
                 CreatedOn = x.CreatedOn
 
+
             })
+
             .ToListAsync();
+
     }
+
+
+
+
 
 
 
@@ -70,18 +84,119 @@ public class LedgerService : ILedgerService
 
     public async Task<LedgerResponse?> GetByIdAsync(Guid id)
     {
+
+
         var ledger = await _context.Ledgers
+
+            .Include(x => x.JournalEntryDetails)
+
+            .ThenInclude(x => x.JournalEntry)
+
             .FirstOrDefaultAsync(x => x.Id == id);
 
 
 
+
+
         if (ledger == null)
+
             return null;
 
 
 
-        return MapResponse(ledger);
+
+
+        var response = MapResponse(ledger);
+
+
+
+
+
+
+        response.Transactions =
+
+            ledger.JournalEntryDetails
+
+            .OrderBy(x => x.JournalEntry.VoucherDate)
+
+            .Select(x => new LedgerTransactionResponse
+            {
+
+                Date =
+                    x.JournalEntry.VoucherDate,
+
+
+                VoucherNo =
+                    x.JournalEntry.VoucherNo,
+
+
+                Narration =
+                    x.JournalEntry.Narration
+                    ??
+                    x.Narration,
+
+
+                Debit =
+                    x.Debit,
+
+
+                Credit =
+                    x.Credit
+
+
+            })
+
+            .ToList();
+
+
+
+
+
+
+
+        var debit =
+
+            response.Transactions
+
+            .Sum(x => x.Debit);
+
+
+
+
+
+        var credit =
+
+            response.Transactions
+
+            .Sum(x => x.Credit);
+
+
+
+
+
+
+        response.ClosingBalance =
+
+            ledger.OpeningBalance
+
+            +
+
+            debit
+
+            -
+
+            credit;
+
+
+
+
+
+        return response;
+
     }
+
+
+
 
 
 
@@ -92,15 +207,15 @@ public class LedgerService : ILedgerService
         CreateLedgerRequest request)
     {
 
+
         var ledger = new LedgerEntity
         {
-            Id = Guid.NewGuid(),
 
+            Id = Guid.NewGuid(),
 
             Code = request.Code,
 
             Name = request.Name,
-
 
 
             AccountHeadId = request.AccountHeadId,
@@ -110,11 +225,9 @@ public class LedgerService : ILedgerService
             AccountSubGroupId = request.AccountSubGroupId,
 
 
-
             OpeningBalance = request.OpeningBalance,
 
             BalanceType = request.BalanceType,
-
 
 
             Address = request.Address,
@@ -126,11 +239,11 @@ public class LedgerService : ILedgerService
             GSTIN = request.GSTIN,
 
 
-
             IsActive = request.IsActive,
 
 
             CreatedOn = DateTime.UtcNow
+
         };
 
 
@@ -143,7 +256,12 @@ public class LedgerService : ILedgerService
 
 
         return MapResponse(ledger);
+
     }
+
+
+
+
 
 
 
@@ -157,11 +275,13 @@ public class LedgerService : ILedgerService
     {
 
         var ledger = await _context.Ledgers
+
             .FirstOrDefaultAsync(x => x.Id == id);
 
 
 
         if (ledger == null)
+
             return false;
 
 
@@ -170,7 +290,6 @@ public class LedgerService : ILedgerService
         ledger.Code = request.Code;
 
         ledger.Name = request.Name;
-
 
 
         ledger.AccountHeadId = request.AccountHeadId;
@@ -210,7 +329,10 @@ public class LedgerService : ILedgerService
 
 
         return true;
+
     }
+
+
 
 
 
@@ -222,11 +344,13 @@ public class LedgerService : ILedgerService
     {
 
         var ledger = await _context.Ledgers
+
             .FirstOrDefaultAsync(x => x.Id == id);
 
 
 
         if (ledger == null)
+
             return false;
 
 
@@ -239,7 +363,9 @@ public class LedgerService : ILedgerService
 
 
         return true;
+
     }
+
 
 
 
@@ -252,26 +378,30 @@ public class LedgerService : ILedgerService
         LedgerEntity x)
     {
 
+
         return new LedgerResponse
         {
+
             Id = x.Id,
 
 
             Code = x.Code,
 
-            Name = x.Name,
 
+            Name = x.Name,
 
 
             AccountHeadId = x.AccountHeadId,
 
+
             AccountGroupId = x.AccountGroupId,
+
 
             AccountSubGroupId = x.AccountSubGroupId,
 
 
-
             OpeningBalance = x.OpeningBalance,
+
 
             BalanceType = x.BalanceType,
 
@@ -279,9 +409,12 @@ public class LedgerService : ILedgerService
 
             Address = x.Address,
 
+
             Mobile = x.Mobile,
 
+
             Email = x.Email,
+
 
             GSTIN = x.GSTIN,
 
@@ -291,6 +424,11 @@ public class LedgerService : ILedgerService
 
 
             CreatedOn = x.CreatedOn
+
+
         };
+
     }
+
+
 }

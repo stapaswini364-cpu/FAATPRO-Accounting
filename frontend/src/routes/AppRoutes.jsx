@@ -66,6 +66,12 @@ import JournalEntry from "../pages/journalEntry/JournalEntry";
 
 
 
+// ================= REPORTS =================
+
+import LedgerReport from "../pages/reports/ledger/LedgerReport";
+
+
+
 
 
 const AppRoutes = () => {
@@ -74,6 +80,8 @@ const AppRoutes = () => {
 return (
 
 <Routes>
+
+
 
 
 
@@ -90,6 +98,7 @@ element={<Login />}
 
 
 
+
 <Route
 
 path="/forgot-password"
@@ -97,6 +106,7 @@ path="/forgot-password"
 element={<ForgotPassword />}
 
 />
+
 
 
 
@@ -143,6 +153,7 @@ element={
 
 
 
+
 {/* ================= CUSTOMERS ================= */}
 
 
@@ -165,6 +176,7 @@ element={
 }
 
 />
+
 
 
 
@@ -259,6 +271,7 @@ element={
 
 
 
+
 {/* ================= ACCOUNT HEAD ================= */}
 
 
@@ -281,6 +294,7 @@ element={
 }
 
 />
+
 
 
 
@@ -317,6 +331,7 @@ element={
 
 
 
+
 {/* ================= ACCOUNT SUB GROUP ================= */}
 
 
@@ -339,6 +354,7 @@ element={
 }
 
 />
+
 
 
 
@@ -375,6 +391,8 @@ element={
 
 
 
+
+
 {/* ================= CHART OF ACCOUNTS ================= */}
 
 
@@ -397,6 +415,8 @@ element={
 }
 
 />
+
+
 
 
 
@@ -433,6 +453,39 @@ element={
 
 
 
+
+
+{/* ================= LEDGER REPORT ================= */}
+
+
+<Route
+
+path="/reports/ledger"
+
+element={
+
+<ProtectedRoute>
+
+<MainLayout>
+
+<LedgerReport />
+
+</MainLayout>
+
+</ProtectedRoute>
+
+}
+
+/>
+
+
+
+
+
+
+
+
+
 {/* ================= SETTINGS ================= */}
 
 
@@ -455,6 +508,7 @@ element={
 }
 
 />
+
 
 
 
@@ -491,6 +545,7 @@ element={
 
 
 
+
 {/* ================= CHANGE PASSWORD ================= */}
 
 
@@ -520,6 +575,7 @@ element={
 
 
 
+
 {/* ================= DEFAULT ================= */}
 
 
@@ -530,6 +586,7 @@ path="*"
 element={<Login />}
 
 />
+
 
 
 

@@ -36,8 +36,13 @@ using FAATPRO.Application.Features.AccountSubGroups.Interfaces;
 using FAATPRO.Application.Features.Dashboard.Interfaces;
 using FAATPRO.Application.Features.Ledgers.Interfaces;
 
+
 // JOURNAL ENTRY
 using FAATPRO.Application.Features.JournalEntries.Interfaces;
+
+
+// LEDGER POSTING
+using FAATPRO.Application.Features.LedgerPosting.Interfaces;
 
 
 
@@ -65,8 +70,13 @@ using FAATPRO.Infrastructure.Services.Customer;
 using FAATPRO.Infrastructure.Services.Dashboard;
 using FAATPRO.Infrastructure.Services.Ledger;
 
+
 // JOURNAL ENTRY
 using FAATPRO.Infrastructure.Services.JournalEntry;
+
+
+// LEDGER POSTING
+using FAATPRO.Infrastructure.Services.LedgerPosting;
 
 
 using FAATPRO.Infrastructure.Authorization;
@@ -115,8 +125,9 @@ public static class DependencyInjection
 
 
         // ==========================
-        // AUTH
+        // SERVICES
         // ==========================
+
 
         services.AddScoped<
             IJwtTokenGenerator,
@@ -129,47 +140,20 @@ public static class DependencyInjection
 
 
 
-
-
-        // ==========================
-        // USER
-        // ==========================
-
         services.AddScoped<
             IUserService,
             UserService>();
 
-
-
-
-
-        // ==========================
-        // ROLE
-        // ==========================
 
         services.AddScoped<
             IRoleService,
             RoleService>();
 
 
-
-
-
-        // ==========================
-        // PERMISSION
-        // ==========================
-
         services.AddScoped<
             IPermissionService,
             PermissionService>();
 
-
-
-
-
-        // ==========================
-        // ROLE PERMISSION
-        // ==========================
 
         services.AddScoped<
             IRolePermissionService,
@@ -177,59 +161,25 @@ public static class DependencyInjection
 
 
 
-
-
-        // ==========================
-        // COMPANY
-        // ==========================
-
         services.AddScoped<
             ICompanyService,
             CompanyService>();
 
-
-
-
-
-        // ==========================
-        // BRANCH
-        // ==========================
 
         services.AddScoped<
             IBranchService,
             BranchService>();
 
 
-
-
-
-        // ==========================
-        // FINANCIAL YEAR
-        // ==========================
-
         services.AddScoped<
             IFinancialYearService,
             FinancialYearService>();
 
 
-
-
-
-        // ==========================
-        // CURRENCY
-        // ==========================
-
         services.AddScoped<
             ICurrencyService,
             CurrencyService>();
 
-
-
-
-
-        // ==========================
-        // CITY
-        // ==========================
 
         services.AddScoped<
             ICityService,
@@ -237,35 +187,15 @@ public static class DependencyInjection
 
 
 
-
-
-        // ==========================
-        // ACCOUNT HEAD
-        // ==========================
-
         services.AddScoped<
             IAccountHeadService,
             AccountHeadService>();
 
 
-
-
-
-        // ==========================
-        // ACCOUNT GROUP
-        // ==========================
-
         services.AddScoped<
             IAccountGroupService,
             AccountGroupService>();
 
-
-
-
-
-        // ==========================
-        // ACCOUNT SUB GROUP
-        // ==========================
 
         services.AddScoped<
             IAccountSubGroupService,
@@ -273,40 +203,19 @@ public static class DependencyInjection
 
 
 
-
-
-        // ==========================
-        // CUSTOMER
-        // ==========================
-
         services.AddScoped<
             ICustomerService,
             CustomerService>();
 
-
-
-
-
-        // ==========================
-        // DASHBOARD
-        // ==========================
 
         services.AddScoped<
             IDashboardService,
             DashboardService>();
 
 
-
-
-
-        // ==========================
-        // LEDGER
-        // ==========================
-
         services.AddScoped<
             ILedgerService,
             LedgerService>();
-
 
 
 
@@ -319,6 +228,16 @@ public static class DependencyInjection
             IJournalEntryService,
             JournalEntryService>();
 
+
+
+
+        // ==========================
+        // LEDGER POSTING
+        // ==========================
+
+        services.AddScoped<
+            ILedgerPostingService,
+            LedgerPostingService>();
 
 
 

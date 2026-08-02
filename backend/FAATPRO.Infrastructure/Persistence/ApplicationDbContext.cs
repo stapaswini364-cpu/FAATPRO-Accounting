@@ -3,20 +3,15 @@ using FAATPRO.Domain.Entities.Accounting;
 
 using Microsoft.EntityFrameworkCore;
 
-
 namespace FAATPRO.Infrastructure.Persistence;
-
 
 public class ApplicationDbContext : DbContext
 {
-
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
-
-
 
     // ==========================================
     // Company Module
@@ -38,8 +33,6 @@ public class ApplicationDbContext : DbContext
 
 
 
-
-
     // ==========================================
     // Identity Module
     // ==========================================
@@ -55,8 +48,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-
-
 
 
 
@@ -76,7 +67,11 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<JournalEntryDetail> JournalEntryDetails => Set<JournalEntryDetail>();
 
+    // Ledger Posting
 
+    public DbSet<LedgerPosting> LedgerPostings => Set<LedgerPosting>();
+
+    public DbSet<LedgerPostingDetail> LedgerPostingDetails => Set<LedgerPostingDetail>();
 
 
 
@@ -88,22 +83,13 @@ public class ApplicationDbContext : DbContext
 
 
 
-
-
-
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
-
         base.OnModelCreating(modelBuilder);
-
-
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(ApplicationDbContext).Assembly);
-
-
-
 
 
 
@@ -118,20 +104,15 @@ public class ApplicationDbContext : DbContext
                 x.RoleId
             });
 
-
         modelBuilder.Entity<UserRole>()
             .HasOne(x => x.User)
             .WithMany(x => x.UserRoles)
             .HasForeignKey(x => x.UserId);
 
-
         modelBuilder.Entity<UserRole>()
             .HasOne(x => x.Role)
             .WithMany(x => x.UserRoles)
             .HasForeignKey(x => x.RoleId);
-
-
-
 
 
 
@@ -146,20 +127,15 @@ public class ApplicationDbContext : DbContext
                 x.PermissionId
             });
 
-
         modelBuilder.Entity<RolePermission>()
             .HasOne(x => x.Role)
             .WithMany(x => x.RolePermissions)
             .HasForeignKey(x => x.RoleId);
 
-
         modelBuilder.Entity<RolePermission>()
             .HasOne(x => x.Permission)
             .WithMany(x => x.RolePermissions)
             .HasForeignKey(x => x.PermissionId);
-
-
-
 
 
 
@@ -174,9 +150,6 @@ public class ApplicationDbContext : DbContext
 
 
 
-
-
-
         // ==========================================
         // Country State City
         // ==========================================
@@ -185,20 +158,15 @@ public class ApplicationDbContext : DbContext
             .HasIndex(x => x.Code)
             .IsUnique();
 
-
         modelBuilder.Entity<Country>()
             .HasMany(x => x.States)
             .WithOne(x => x.Country)
             .HasForeignKey(x => x.CountryId);
 
-
         modelBuilder.Entity<State>()
             .HasMany<City>()
             .WithOne(x => x.State)
             .HasForeignKey(x => x.StateId);
-
-
-
 
 
 
@@ -212,9 +180,6 @@ public class ApplicationDbContext : DbContext
 
 
 
-
-
-
         // ==========================================
         // Account Group
         // ==========================================
@@ -223,15 +188,11 @@ public class ApplicationDbContext : DbContext
             .HasIndex(x => x.Code)
             .IsUnique();
 
-
         modelBuilder.Entity<AccountGroup>()
             .HasOne(x => x.AccountHead)
             .WithMany(x => x.AccountGroups)
             .HasForeignKey(x => x.AccountHeadId)
             .OnDelete(DeleteBehavior.Restrict);
-
-
-
 
 
 
@@ -243,15 +204,11 @@ public class ApplicationDbContext : DbContext
             .HasIndex(x => x.Code)
             .IsUnique();
 
-
         modelBuilder.Entity<AccountSubGroup>()
             .HasOne(x => x.AccountGroup)
             .WithMany()
             .HasForeignKey(x => x.AccountGroupId)
             .OnDelete(DeleteBehavior.Restrict);
-
-
-
 
 
 
@@ -263,20 +220,17 @@ public class ApplicationDbContext : DbContext
             .HasIndex(x => x.Code)
             .IsUnique();
 
-
         modelBuilder.Entity<Ledger>()
             .HasOne(x => x.AccountHead)
             .WithMany()
             .HasForeignKey(x => x.AccountHeadId)
             .OnDelete(DeleteBehavior.Restrict);
 
-
         modelBuilder.Entity<Ledger>()
             .HasOne(x => x.AccountGroup)
             .WithMany()
             .HasForeignKey(x => x.AccountGroupId)
             .OnDelete(DeleteBehavior.Restrict);
-
 
         modelBuilder.Entity<Ledger>()
             .HasOne(x => x.AccountSubGroup)
@@ -286,11 +240,7 @@ public class ApplicationDbContext : DbContext
 
 
 
-
-
-
-
-        // ==========================================
+                // ==========================================
         // Journal Entry
         // ==========================================
 
@@ -298,28 +248,39 @@ public class ApplicationDbContext : DbContext
             .HasIndex(x => x.VoucherNo)
             .IsUnique();
 
-
-
         modelBuilder.Entity<JournalEntry>()
             .HasMany(x => x.Details)
             .WithOne(x => x.JournalEntry)
             .HasForeignKey(x => x.JournalEntryId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
-
-
         modelBuilder.Entity<JournalEntryDetail>()
+            .HasOne(x => x.Ledger)
+            .WithMany(x => x.JournalEntryDetails)
+            .HasForeignKey(x => x.LedgerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // ==========================================
+        // Ledger Posting
+        // ==========================================
+
+        modelBuilder.Entity<LedgerPosting>()
             .HasOne(x => x.Ledger)
             .WithMany()
             .HasForeignKey(x => x.LedgerId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<LedgerPosting>()
+            .HasOne(x => x.JournalEntry)
+            .WithMany()
+            .HasForeignKey(x => x.JournalEntryId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-
-
-
-
+        modelBuilder.Entity<LedgerPostingDetail>()
+            .HasOne(x => x.LedgerPosting)
+            .WithMany(x => x.Details)
+            .HasForeignKey(x => x.LedgerPostingId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // ==========================================
         // Unique Index
@@ -329,11 +290,8 @@ public class ApplicationDbContext : DbContext
             .HasIndex(x => x.Email)
             .IsUnique();
 
-
         modelBuilder.Entity<Permission>()
             .HasIndex(x => x.Name)
             .IsUnique();
-
     }
-
 }

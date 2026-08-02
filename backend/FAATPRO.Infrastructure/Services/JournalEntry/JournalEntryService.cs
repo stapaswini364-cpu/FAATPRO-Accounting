@@ -1,6 +1,8 @@
 using FAATPRO.Application.Features.JournalEntries.DTOs;
 using FAATPRO.Application.Features.JournalEntries.Interfaces;
 
+using FAATPRO.Application.Features.LedgerPosting.Interfaces;
+
 using JournalEntryEntity = FAATPRO.Domain.Entities.Accounting.JournalEntry;
 using JournalEntryDetailEntity = FAATPRO.Domain.Entities.Accounting.JournalEntryDetail;
 
@@ -17,12 +19,20 @@ public class JournalEntryService : IJournalEntryService
 
     private readonly ApplicationDbContext _context;
 
+    private readonly ILedgerPostingService _ledgerPostingService;
+
+
 
     public JournalEntryService(
-        ApplicationDbContext context)
+        ApplicationDbContext context,
+        ILedgerPostingService ledgerPostingService)
     {
         _context = context;
+
+        _ledgerPostingService = ledgerPostingService;
     }
+
+
 
 
 
@@ -32,6 +42,7 @@ public class JournalEntryService : IJournalEntryService
         return await _context.JournalEntries
 
             .Include(x => x.Details)
+
             .ThenInclude(x => x.Ledger)
 
             .OrderByDescending(x => x.VoucherDate)
@@ -62,6 +73,7 @@ public class JournalEntryService : IJournalEntryService
 
                 Details = x.Details.Select(d => new JournalEntryDetailResponse
                 {
+
                     LedgerId = d.LedgerId,
 
                     LedgerName = d.Ledger.Name,
@@ -72,7 +84,9 @@ public class JournalEntryService : IJournalEntryService
 
                     Narration = d.Narration
 
+
                 }).ToList()
+
 
             })
 
@@ -84,20 +98,27 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
+
     public async Task<JournalEntryResponse?> GetByIdAsync(Guid id)
     {
 
-        var entry = await _context.JournalEntries
+        var entry =
+            await _context.JournalEntries
 
             .Include(x => x.Details)
+
             .ThenInclude(x => x.Ledger)
 
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(
+                x => x.Id == id
+            );
 
 
 
-        if (entry == null)
+        if(entry == null)
             return null;
+
 
 
 
@@ -125,24 +146,28 @@ public class JournalEntryService : IJournalEntryService
             CreatedOn = entry.CreatedOn,
 
 
-            Details = entry.Details.Select(d => new JournalEntryDetailResponse
-            {
+            Details =
+                entry.Details.Select(d =>
+                new JournalEntryDetailResponse
+                {
 
-                LedgerId = d.LedgerId,
+                    LedgerId = d.LedgerId,
 
-                LedgerName = d.Ledger.Name,
+                    LedgerName = d.Ledger.Name,
 
-                Debit = d.Debit,
+                    Debit = d.Debit,
 
-                Credit = d.Credit,
+                    Credit = d.Credit,
 
-                Narration = d.Narration
+                    Narration = d.Narration
 
-            }).ToList()
+
+                }).ToList()
 
         };
 
     }
+
 
 
 
@@ -159,15 +184,17 @@ public class JournalEntryService : IJournalEntryService
             request.Details.Sum(x => x.Debit);
 
 
+
         var totalCredit =
             request.Details.Sum(x => x.Credit);
 
 
 
-        if (totalDebit != totalCredit)
+        if(totalDebit != totalCredit)
         {
             throw new Exception(
-                "Debit and Credit must be equal.");
+                "Debit and Credit must be equal."
+            );
         }
 
 
@@ -181,19 +208,28 @@ public class JournalEntryService : IJournalEntryService
 
             VoucherNo = request.VoucherNo,
 
-            VoucherDate = request.VoucherDate,
+
+            VoucherDate =
+                DateTime.SpecifyKind(
+                    request.VoucherDate,
+                    DateTimeKind.Utc
+                ),
+
 
             ReferenceNo = request.ReferenceNo,
 
             Narration = request.Narration,
 
+
             TotalDebit = totalDebit,
 
             TotalCredit = totalCredit,
 
+
             CompanyId = request.CompanyId,
 
             FinancialYearId = request.FinancialYearId,
+
 
             CreatedOn = DateTime.UtcNow
 
@@ -203,10 +239,12 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
         foreach(var item in request.Details)
         {
 
             entry.Details.Add(
+
                 new JournalEntryDetailEntity
                 {
 
@@ -220,9 +258,12 @@ public class JournalEntryService : IJournalEntryService
 
                     Narration = item.Narration
 
-                });
+                }
+
+            );
 
         }
+
 
 
 
@@ -235,12 +276,180 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
+
+        // ===============================
+        // AUTO LEDGER POSTING
+        // ===============================
+
+        await _ledgerPostingService
+            .CreatePostingAsync(entry.Id);
+
+
+
+
+
+
         return await GetByIdAsync(entry.Id)
 
             ?? throw new Exception(
-                "Journal Entry failed");
+                "Journal Entry creation failed."
+            );
 
     }
+
+
+
+
+
+
+
+
+    public async Task<JournalEntryResponse> UpdateAsync(
+        Guid id,
+        CreateJournalEntryRequest request)
+    {
+
+
+        var entry =
+            await _context.JournalEntries
+
+            .Include(x => x.Details)
+
+            .FirstOrDefaultAsync(
+                x => x.Id == id
+            );
+
+
+
+        if(entry == null)
+        {
+            throw new Exception(
+                "Journal Entry not found."
+            );
+        }
+
+
+
+
+        var totalDebit =
+            request.Details.Sum(x => x.Debit);
+
+
+        var totalCredit =
+            request.Details.Sum(x => x.Credit);
+
+
+
+        if(totalDebit != totalCredit)
+        {
+            throw new Exception(
+                "Debit and Credit must be equal."
+            );
+        }
+
+
+
+
+
+        entry.VoucherNo =
+            request.VoucherNo;
+
+
+        entry.VoucherDate =
+            DateTime.SpecifyKind(
+                request.VoucherDate,
+                DateTimeKind.Utc
+            );
+
+
+        entry.ReferenceNo =
+            request.ReferenceNo;
+
+
+        entry.Narration =
+            request.Narration;
+
+
+        entry.CompanyId =
+            request.CompanyId;
+
+
+        entry.FinancialYearId =
+            request.FinancialYearId;
+
+
+        entry.TotalDebit =
+            totalDebit;
+
+
+        entry.TotalCredit =
+            totalCredit;
+
+
+
+
+
+
+        _context.JournalEntryDetails
+            .RemoveRange(entry.Details);
+
+
+
+        entry.Details.Clear();
+
+
+
+
+
+        foreach(var item in request.Details)
+        {
+
+            entry.Details.Add(
+
+                new JournalEntryDetailEntity
+                {
+
+                    Id = Guid.NewGuid(),
+
+                    LedgerId = item.LedgerId,
+
+                    Debit = item.Debit,
+
+                    Credit = item.Credit,
+
+                    Narration = item.Narration
+
+                }
+
+            );
+
+        }
+
+
+
+
+
+        await _context.SaveChangesAsync();
+
+
+
+
+        await _ledgerPostingService
+            .CreatePostingAsync(id);
+
+
+
+
+
+        return await GetByIdAsync(id)
+
+            ?? throw new Exception(
+                "Journal Entry update failed."
+            );
+
+    }
+
 
 
 
@@ -251,9 +460,15 @@ public class JournalEntryService : IJournalEntryService
     public async Task<bool> DeleteAsync(Guid id)
     {
 
+
         var entry =
             await _context.JournalEntries
-            .FirstOrDefaultAsync(x => x.Id == id);
+
+            .Include(x => x.Details)
+
+            .FirstOrDefaultAsync(
+                x => x.Id == id
+            );
 
 
 
@@ -262,14 +477,26 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-        _context.JournalEntries.Remove(entry);
+
+
+        _context.JournalEntryDetails
+            .RemoveRange(entry.Details);
+
+
+
+        _context.JournalEntries
+            .Remove(entry);
+
+
 
 
         await _context.SaveChangesAsync();
 
 
+
         return true;
 
     }
+
 
 }

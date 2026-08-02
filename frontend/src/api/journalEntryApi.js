@@ -19,7 +19,6 @@ const journalEntryApi = {
 
 
 
-
     // ================= GET BY ID =================
 
     getById: async (id) => {
@@ -32,7 +31,6 @@ const journalEntryApi = {
         return response.data;
 
     },
-
 
 
 
@@ -52,6 +50,21 @@ const journalEntryApi = {
 
 
 
+    // ================= UPDATE =================
+
+    update: async (id, data) => {
+
+        const response =
+            await axios.put(
+                `/JournalEntry/${id}`,
+                data
+            );
+
+        return response.data;
+
+    },
+
+
 
     // ================= DELETE =================
 
@@ -65,7 +78,6 @@ const journalEntryApi = {
         return response.data;
 
     }
-
 
 
 };

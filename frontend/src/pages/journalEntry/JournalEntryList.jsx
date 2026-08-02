@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import JournalEntryPrint from "./components/JournalEntryPrint";
+
 import {
     Box,
     Button,
@@ -9,15 +11,15 @@ import {
     Stack,
     Typography,
     Snackbar,
-    Alert,
+    Alert
 } from "@mui/material";
 
+
 import {
-    DataGrid,
+    DataGrid
 } from "@mui/x-data-grid";
 
 
-import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -27,120 +29,252 @@ import PrintIcon from "@mui/icons-material/Print";
 
 import journalEntryApi from "../../api/journalEntryApi";
 
-
-
-const JournalEntryList = () => {
-
-
-    const [rows, setRows] = useState([]);
-
-    const [loading, setLoading] = useState(false);
-
-    const [message, setMessage] = useState("");
-
-    const [openSnackbar, setOpenSnackbar] = useState(false);
+import JournalEntryView 
+from "./components/JournalEntryView";
 
 
 
-    const loadJournalEntries = async () => {
-
-        try {
-
-            setLoading(true);
-
-            const data = await journalEntryApi.getAll();
+const JournalEntryList = ({
+    onEdit
+}) => {
 
 
-            setRows(
-                data.map((item) => ({
-                    id: item.id,
-                    voucherNo:
-                        item.voucherNo ||
-                        item.voucherNumber ||
-                        "-",
-
-                    date:
-                        item.date ||
-                        item.voucherDate ||
-                        "-",
-
-                    narration:
-                        item.narration ||
-                        "-",
-
-                    debit:
-                        item.totalDebit ||
-                        0,
-
-                    credit:
-                        item.totalCredit ||
-                        0,
-
-                }))
-            );
+    const [rows,setRows] =
+        useState([]);
 
 
-        }
-        catch (error) {
+    const [loading,setLoading] =
+        useState(false);
 
-            console.error(error);
 
-            setMessage(
-                "Failed to load Journal Entries"
-            );
+    const [message,setMessage] =
+        useState("");
 
-            setOpenSnackbar(true);
 
-        }
-        finally {
+    const [openSnackbar,setOpenSnackbar] =
+        useState(false);
 
-            setLoading(false);
 
-        }
+
+    const [viewData,setViewData] =
+        useState(null);
+
+
+    const [viewOpen,setViewOpen] =
+        useState(false);
+
+
+
+    const [printData,setPrintData] =
+        useState(null);
+
+
+    const [printOpen,setPrintOpen] =
+        useState(false);
+
+
+
+
+
+    const formatDate=(date)=>{
+
+
+        if(!date)
+            return "-";
+
+
+        return new Date(date)
+        .toLocaleDateString("en-IN");
+
 
     };
 
 
 
-    useEffect(() => {
-
-        loadJournalEntries();
-
-    }, []);
 
 
+    const formatAmount=(amount)=>{
+
+
+        return new Intl.NumberFormat(
+            "en-IN",
+            {
+                style:"currency",
+                currency:"INR"
+            }
+
+        )
+        .format(amount || 0);
+
+
+    };
 
 
 
-    const handleDelete = async (id) => {
 
 
-        const confirmDelete =
-            window.confirm(
-                "Delete this Journal Entry?"
+
+
+    const loadJournalEntries=async()=>{
+
+
+        try{
+
+
+            setLoading(true);
+
+
+
+            const response =
+                await journalEntryApi.getAll();
+
+
+
+            const data =
+
+                Array.isArray(response)
+
+                ?
+
+                response
+
+                :
+
+                response.data || [];
+
+
+
+
+
+            setRows(
+
+                data.map(item=>(
+
+                    {
+
+                        id:item.id,
+
+
+                        voucherNo:
+                        item.voucherNo || "-",
+
+
+
+                        date:
+                        formatDate(
+                            item.voucherDate
+                        ),
+
+
+
+                        narration:
+                        item.narration || "-",
+
+
+
+                        debit:
+                        item.totalDebit || 0,
+
+
+
+                        credit:
+                        item.totalCredit || 0
+
+                    }
+
+                ))
+
             );
 
 
-        if (!confirmDelete)
-            return;
+
+        }
+        catch(error){
 
 
-
-        try {
-
-
-            await journalEntryApi.delete(id);
+            console.error(
+                "Journal Load Error",
+                error
+            );
 
 
             setMessage(
-                "Journal Entry deleted successfully"
+                "Journal Load Failed"
             );
 
 
             setOpenSnackbar(true);
 
 
+        }
+        finally{
+
+
+            setLoading(false);
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+    useEffect(()=>{
+
+
+        loadJournalEntries();
+
+
+    },[]);
+
+
+
+
+
+
+
+
+
+
+    const handleDelete=async(id)=>{
+
+
+        const confirm =
+            window.confirm(
+                "Delete this voucher?"
+            );
+
+
+
+        if(!confirm)
+            return;
+
+
+
+
+        try{
+
+
+            await journalEntryApi.delete(id);
+
+
+
+            setMessage(
+                "Voucher Deleted Successfully"
+            );
+
+
+            setOpenSnackbar(true);
+
+
+
             loadJournalEntries();
+
 
 
         }
@@ -150,15 +284,18 @@ const JournalEntryList = () => {
             console.error(error);
 
 
+
             setMessage(
-                "Delete failed"
+                "Delete Failed"
             );
 
 
             setOpenSnackbar(true);
 
 
+
         }
+
 
     };
 
@@ -166,87 +303,293 @@ const JournalEntryList = () => {
 
 
 
-    const columns = [
+
+
+
+
+    const handleView=async(id)=>{
+
+
+        try{
+
+
+            const data =
+                await journalEntryApi.getById(id);
+
+
+
+            setViewData(data);
+
+
+
+            setViewOpen(true);
+
+
+
+        }
+        catch(error){
+
+
+            console.error(
+                "View Error",
+                error
+            );
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+
+    const handlePrint=async(id)=>{
+
+
+        try{
+
+
+            const data =
+                await journalEntryApi.getById(id);
+
+
+
+            setPrintData(data);
+
+
+
+            setPrintOpen(true);
+
+
+
+        }
+        catch(error){
+
+
+            console.error(
+                "Print Error",
+                error
+            );
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+
+    const columns=[
+
+
 
         {
-            field: "voucherNo",
-            headerName: "Voucher No",
-            width:150
+            field:"voucherNo",
+
+            headerName:"Voucher No",
+
+            width:180
+
         },
+
+
 
 
         {
             field:"date",
+
             headerName:"Date",
-            width:150
+
+            width:130
+
         },
+
+
 
 
         {
             field:"narration",
+
             headerName:"Narration",
-            width:300
+
+            width:250
+
         },
+
+
 
 
         {
             field:"debit",
+
             headerName:"Debit",
-            width:120
+
+            width:150,
+
+
+            renderCell:(params)=>
+
+                formatAmount(
+                    params.value
+                )
+
+
         },
+
+
 
 
         {
             field:"credit",
+
             headerName:"Credit",
-            width:120
+
+            width:150,
+
+
+            renderCell:(params)=>
+
+                formatAmount(
+                    params.value
+                )
+
+
         },
 
 
+
+
+
+
         {
+
             field:"actions",
+
             headerName:"Actions",
-            width:220,
+
+            width:230,
+
+
 
             renderCell:(params)=>(
-                
-                <Stack direction="row">
 
 
-                    <IconButton color="primary">
-
-                        <VisibilityIcon />
-
-                    </IconButton>
-
-
-
-                    <IconButton color="success">
-
-                        <EditIcon />
-
-                    </IconButton>
-
-
-
-                    <IconButton color="info">
-
-                        <PrintIcon />
-
-                    </IconButton>
+                <Stack
+                    direction="row"
+                >
 
 
 
                     <IconButton
-                        color="error"
-                        onClick={() =>
-                            handleDelete(
+
+                        color="primary"
+
+                        title="View"
+
+                        onClick={()=>{
+
+                            handleView(
                                 params.row.id
-                            )
-                        }
+                            );
+
+                        }}
+
                     >
 
-                        <DeleteIcon />
+                        <VisibilityIcon/>
+
+                    </IconButton>
+
+
+
+
+
+
+
+
+                    <IconButton
+
+                        color="success"
+
+                        title="Edit"
+
+                        onClick={()=>{
+
+                            onEdit(
+                                params.row.id
+                            );
+
+                        }}
+
+                    >
+
+                        <EditIcon/>
+
+                    </IconButton>
+
+
+
+
+
+
+
+
+                    <IconButton
+
+                        color="info"
+
+                        title="Print"
+
+                        onClick={()=>{
+
+                            handlePrint(
+                                params.row.id
+                            );
+
+                        }}
+
+                    >
+
+                        <PrintIcon/>
+
+                    </IconButton>
+
+
+
+
+
+
+
+
+                    <IconButton
+
+                        color="error"
+
+                        title="Delete"
+
+                        onClick={()=>{
+
+                            handleDelete(
+                                params.row.id
+                            );
+
+                        }}
+
+                    >
+
+                        <DeleteIcon/>
 
                     </IconButton>
 
@@ -254,9 +597,12 @@ const JournalEntryList = () => {
 
                 </Stack>
 
+
             )
 
+
         }
+
 
     ];
 
@@ -265,60 +611,70 @@ const JournalEntryList = () => {
 
 
 
+
+
+
     return (
+
 
         <Box sx={{p:3}}>
 
 
-            <Paper
-                elevation={3}
-                sx={{p:3}}
-            >
+
+            <Paper sx={{p:3}}>
+
 
 
                 <Stack
+
                     direction="row"
+
                     justifyContent="space-between"
+
                     mb={3}
+
                 >
 
 
+
                     <Typography
+
                         variant="h5"
+
                         fontWeight={600}
+
                     >
+
                         Journal Entries
+
+
                     </Typography>
 
 
 
-                    <Stack
-                        direction="row"
-                        spacing={2}
+
+
+
+                    <Button
+
+                        variant="outlined"
+
+                        startIcon={
+                            <RefreshIcon/>
+                        }
+
+                        onClick={
+                            loadJournalEntries
+                        }
+
                     >
 
-
-                        <Button
-                            variant="outlined"
-                            startIcon={<RefreshIcon />}
-                            onClick={
-                                loadJournalEntries
-                            }
-                        >
-                            Refresh
-                        </Button>
+                        Refresh
 
 
-
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                        >
-                            New Voucher
-                        </Button>
+                    </Button>
 
 
-                    </Stack>
 
 
                 </Stack>
@@ -327,56 +683,98 @@ const JournalEntryList = () => {
 
 
 
+
+
+
+
                 {
-                    loading ?
+
+                    loading
+
+
+                    ?
+
 
 
                     <Box
+
                         display="flex"
+
                         justifyContent="center"
+
                         p={5}
+
                     >
 
-                        <CircularProgress />
+                        <CircularProgress/>
+
 
                     </Box>
+
 
 
                     :
 
 
+
+
                     <DataGrid
+
 
                         rows={rows}
 
+
                         columns={columns}
 
-                        pageSizeOptions={
-                            [5,10,25]
-                        }
+
+                        autoHeight
+
+
+
+                        pageSizeOptions={[
+                            5,
+                            10,
+                            25
+                        ]}
+
+
 
                         initialState={{
 
                             pagination:{
+
                                 paginationModel:{
+
                                     pageSize:10,
+
                                     page:0
+
                                 }
+
                             }
 
                         }}
 
-                        autoHeight
+
 
                         disableRowSelectionOnClick
 
+
                     />
+
 
                 }
 
 
 
+
+
             </Paper>
+
+
+
+
+
 
 
 
@@ -388,15 +786,19 @@ const JournalEntryList = () => {
 
                 autoHideDuration={3000}
 
-                onClose={() =>
-                    setOpenSnackbar(false)
-                }
+                onClose={()=>{
+
+                    setOpenSnackbar(false);
+
+                }}
 
             >
+
 
                 <Alert severity="success">
 
                     {message}
+
 
                 </Alert>
 
@@ -405,13 +807,66 @@ const JournalEntryList = () => {
 
 
 
+
+
+
+
+
+
+            <JournalEntryView
+
+
+                open={viewOpen}
+
+
+                data={viewData}
+
+
+                onClose={()=>{
+
+                    setViewOpen(false);
+
+                }}
+
+
+            />
+
+
+
+
+
+
+
+
+
+            <JournalEntryPrint
+
+
+                open={printOpen}
+
+
+                data={printData}
+
+
+                onClose={()=>{
+
+                    setPrintOpen(false);
+
+                }}
+
+
+            />
+
+
+
+
         </Box>
+
 
     );
 
 
 };
-
 
 
 export default JournalEntryList;

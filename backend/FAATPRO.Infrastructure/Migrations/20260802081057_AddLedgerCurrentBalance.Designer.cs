@@ -3,6 +3,7 @@ using System;
 using FAATPRO.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FAATPRO.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802081057_AddLedgerCurrentBalance")]
+    partial class AddLedgerCurrentBalance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,72 +386,6 @@ namespace FAATPRO.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Ledgers");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPosting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("Credit")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("Debit")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("JournalEntryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("LedgerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Narration")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("PostingDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JournalEntryId");
-
-                    b.HasIndex("LedgerId");
-
-                    b.ToTable("LedgerPostings");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPostingDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Credit")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("Debit")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("LedgerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("LedgerPostingId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Particulars")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LedgerId");
-
-                    b.HasIndex("LedgerPostingId");
-
-                    b.ToTable("LedgerPostingDetails");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Branch", b =>
@@ -956,7 +893,7 @@ namespace FAATPRO.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("FAATPRO.Domain.Entities.Accounting.Ledger", "Ledger")
-                        .WithMany("JournalEntryDetails")
+                        .WithMany()
                         .HasForeignKey("LedgerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -990,44 +927,6 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.Navigation("AccountHead");
 
                     b.Navigation("AccountSubGroup");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPosting", b =>
-                {
-                    b.HasOne("FAATPRO.Domain.Entities.Accounting.JournalEntry", "JournalEntry")
-                        .WithMany()
-                        .HasForeignKey("JournalEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FAATPRO.Domain.Entities.Accounting.Ledger", "Ledger")
-                        .WithMany()
-                        .HasForeignKey("LedgerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("JournalEntry");
-
-                    b.Navigation("Ledger");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPostingDetail", b =>
-                {
-                    b.HasOne("FAATPRO.Domain.Entities.Accounting.Ledger", "Ledger")
-                        .WithMany()
-                        .HasForeignKey("LedgerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FAATPRO.Domain.Entities.Accounting.LedgerPosting", "LedgerPosting")
-                        .WithMany("Details")
-                        .HasForeignKey("LedgerPostingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ledger");
-
-                    b.Navigation("LedgerPosting");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Branch", b =>
@@ -1129,16 +1028,6 @@ namespace FAATPRO.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.JournalEntry", b =>
-                {
-                    b.Navigation("Details");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.Ledger", b =>
-                {
-                    b.Navigation("JournalEntryDetails");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPosting", b =>
                 {
                     b.Navigation("Details");
                 });

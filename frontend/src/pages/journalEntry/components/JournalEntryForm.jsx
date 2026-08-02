@@ -12,58 +12,67 @@ import {
     Typography
 } from "@mui/material";
 
-
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
-
 
 import journalEntryApi from "../../../api/journalEntryApi";
 import ledgerApi from "../../../api/ledgerApi";
 
 
-
-const JournalEntryForm = ({ onCancel }) => {
-
-
-    const [voucherNo] = useState(
-        "JV-" + Date.now()
-    );
+const JournalEntryForm = ({
+    onCancel,
+    editId = null
+}) => {
 
 
-    const [voucherDate,setVoucherDate] = useState(
-        new Date()
-        .toISOString()
-        .split("T")[0]
-    );
+    const [voucherNo,setVoucherNo] =
+        useState("JV-" + Date.now());
 
 
-    const [referenceNo,setReferenceNo] = useState("");
+    const [voucherDate,setVoucherDate] =
+        useState(
+            new Date()
+            .toISOString()
+            .split("T")[0]
+        );
 
-    const [narration,setNarration] = useState("");
+
+    const [referenceNo,setReferenceNo] =
+        useState("");
 
 
-    const [ledgerList,setLedgerList] = useState([]);
+    const [narration,setNarration] =
+        useState("");
+
+
+    const [isEdit,setIsEdit] =
+        useState(false);
+
+
+    const [ledgerList,setLedgerList] =
+        useState([]);
 
 
 
-    const [rows,setRows] = useState([
+    const [rows,setRows] =
+        useState([
 
-        {
-            id:1,
-            ledgerId:"",
-            debit:"",
-            credit:""
-        },
+            {
+                id:1,
+                ledgerId:"",
+                debit:"",
+                credit:""
+            },
 
-        {
-            id:2,
-            ledgerId:"",
-            debit:"",
-            credit:""
-        }
+            {
+                id:2,
+                ledgerId:"",
+                debit:"",
+                credit:""
+            }
 
-    ]);
+        ]);
 
 
 
@@ -73,11 +82,20 @@ const JournalEntryForm = ({ onCancel }) => {
 
         loadLedgers();
 
+        if(editId)
+        {
+            loadJournalEntry();
+        }
+
     },[]);
 
 
 
 
+
+    // =========================
+    // LOAD LEDGERS
+    // =========================
 
     const loadLedgers = async()=>{
 
@@ -87,7 +105,21 @@ const JournalEntryForm = ({ onCancel }) => {
                 await ledgerApi.getAll();
 
 
-            setLedgerList(data);
+            console.log(
+                "LEDGER DATA",
+                data
+            );
+
+
+            setLedgerList(
+
+                Array.isArray(data)
+                ?
+                data
+                :
+                data.data || []
+
+            );
 
 
         }
@@ -107,23 +139,76 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
+    // =========================
+    // LOAD EDIT DATA
+    // =========================
+
+    const loadJournalEntry = async()=>{
+
+        try{
 
 
-    const addRow = ()=>{
+            const data =
+                await journalEntryApi.getById(editId);
 
 
-        setRows([
 
-            ...rows,
+            setVoucherNo(
+                data.voucherNo
+            );
 
-            {
-                id:Date.now(),
-                ledgerId:"",
-                debit:"",
-                credit:""
-            }
 
-        ]);
+            setVoucherDate(
+                data.voucherDate.split("T")[0]
+            );
+
+
+            setReferenceNo(
+                data.referenceNo || ""
+            );
+
+
+            setNarration(
+                data.narration || ""
+            );
+
+
+
+            setRows(
+
+                data.details.map(
+                    (item,index)=>({
+
+                        id:index+1,
+
+                        ledgerId:
+                        String(item.ledgerId),
+
+                        debit:
+                        item.debit,
+
+                        credit:
+                        item.credit
+
+                    })
+
+                )
+
+            );
+
+
+            setIsEdit(true);
+
+
+        }
+        catch(error){
+
+            console.error(
+                "Edit Load Error",
+                error
+            );
+
+        }
 
     };
 
@@ -133,11 +218,49 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
+    // =========================
+    // ADD ROW
+    // =========================
+
+    const addRow = ()=>{
+
+
+        setRows(prev=>[
+
+            ...prev,
+
+            {
+
+                id:Date.now(),
+
+                ledgerId:"",
+
+                debit:"",
+
+                credit:""
+
+            }
+
+        ]);
+
+
+    };
+
+
+
+
+
+
+
+    // =========================
+    // DELETE ROW
+    // =========================
 
     const removeRow=(id)=>{
 
 
-        if(rows.length<=2){
+        if(rows.length <= 2)
+        {
 
             alert(
                 "Minimum two rows required"
@@ -149,10 +272,14 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
         setRows(
-            rows.filter(
+
+            prev=>
+            prev.filter(
                 row=>row.id!==id
             )
+
         );
+
 
     };
 
@@ -162,56 +289,65 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
+    // =========================
+    // UPDATE ROW
+    // =========================
 
     const updateRow=(id,field,value)=>{
 
 
-        setRows(
+        setRows(prev=>
 
-            rows.map(row=>{
-
-
-                if(row.id===id){
+            prev.map(row=>{
 
 
-                    if(field==="debit"){
-
-                        return {
-
-                            ...row,
-
-                            debit:value,
-
-                            credit:""
-
-                        };
-
-                    }
+                if(row.id!==id)
+                    return row;
 
 
 
-                    if(field==="credit"){
-
-                        return {
-
-                            ...row,
-
-                            credit:value,
-
-                            debit:""
-
-                        };
-
-                    }
-
-
+                if(field==="debit")
+                {
 
                     return {
 
                         ...row,
 
-                        [field]:value
+                        debit:value,
+
+                        credit:""
+
+                    };
+
+                }
+
+
+
+                if(field==="credit")
+                {
+
+                    return {
+
+                        ...row,
+
+                        credit:value,
+
+                        debit:""
+
+                    };
+
+                }
+
+
+
+                if(field==="ledgerId")
+                {
+
+                    return {
+
+                        ...row,
+
+                        ledgerId:String(value)
 
                     };
 
@@ -236,29 +372,36 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
-    const totalDebit = rows.reduce(
-
-        (sum,row)=>
-
-        sum + Number(row.debit || 0),
-
-        0
-
-    );
+    // =========================
+    // TOTAL
+    // =========================
 
 
+    const totalDebit =
+
+        rows.reduce(
+
+            (sum,row)=>
+
+            sum + Number(row.debit || 0),
+
+            0
+
+        );
 
 
-    const totalCredit = rows.reduce(
 
-        (sum,row)=>
+    const totalCredit =
 
-        sum + Number(row.credit || 0),
+        rows.reduce(
 
-        0
+            (sum,row)=>
 
-    );
+            sum + Number(row.credit || 0),
+
+            0
+
+        );
 
 
 
@@ -273,6 +416,11 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
+    // =========================
+    // SAVE
+    // =========================
+
+
     const handleSave = async()=>{
 
 
@@ -280,7 +428,8 @@ const JournalEntryForm = ({ onCancel }) => {
             rows.some(
                 row=>!row.ledgerId
             )
-        ){
+        )
+        {
 
             alert(
                 "Please select ledger"
@@ -292,24 +441,8 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
-
-        if(totalDebit<=0 || totalCredit<=0){
-
-            alert(
-                "Debit and Credit required"
-            );
-
-            return;
-
-        }
-
-
-
-
-
-
-        if(difference!==0){
+        if(difference !== 0)
+        {
 
             alert(
                 "Debit and Credit must be equal"
@@ -323,28 +456,20 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
-
-
         const payload={
 
 
             voucherNo,
 
-
             voucherDate,
 
-
             referenceNo,
-
 
             narration,
 
 
-
             companyId:
             "00000000-0000-0000-0000-000000000001",
-
 
 
             financialYearId:
@@ -352,50 +477,35 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
-
             details:
 
-            rows.map(row=>(
+            rows.map(row=>({
+
+                ledgerId:
+                String(row.ledgerId),
 
 
-                {
-
-                    ledgerId:
-                        row.ledgerId,
+                debit:
+                Number(row.debit || 0),
 
 
-                    debit:
-                        Number(
-                            row.debit || 0
-                        ),
+                credit:
+                Number(row.credit || 0),
 
 
-                    credit:
-                        Number(
-                            row.credit || 0
-                        ),
+                narration
 
+            }))
 
-                    narration
-
-                }
-
-
-            ))
 
         };
 
 
 
-
-
-
         console.log(
-            "Journal Payload",
+            "JOURNAL PAYLOAD",
             payload
         );
-
 
 
 
@@ -403,16 +513,29 @@ const JournalEntryForm = ({ onCancel }) => {
         try{
 
 
-            await journalEntryApi.create(
-                payload
-            );
+            if(isEdit)
+            {
+
+                await journalEntryApi.update(
+                    editId,
+                    payload
+                );
+
+            }
+            else
+            {
+
+                await journalEntryApi.create(
+                    payload
+                );
+
+            }
 
 
 
             alert(
                 "Journal Entry Saved Successfully"
             );
-
 
 
             onCancel();
@@ -423,12 +546,13 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
             console.error(
-                error
+                "SAVE ERROR",
+                error.response?.data || error
             );
 
 
             alert(
-                "Save Failed"
+                "Journal Save Failed"
             );
 
 
@@ -444,130 +568,126 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
     return (
 
-        <Box>
+    <Box>
 
 
-            <Grid
-                container
-                spacing={2}
-            >
+        <Grid container spacing={2}>
 
 
-                <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={3}>
 
-                    <TextField
+                <TextField
 
-                        fullWidth
+                    fullWidth
 
-                        label="Voucher No"
+                    label="Voucher No"
 
-                        value={voucherNo}
+                    value={voucherNo}
 
-                        disabled
+                    disabled
 
-                    />
+                />
 
-                </Grid>
+            </Grid>
 
 
 
+            <Grid item xs={12} md={3}>
 
-                <Grid item xs={12} md={3}>
+                <TextField
 
-                    <TextField
+                    fullWidth
 
-                        fullWidth
+                    type="date"
 
-                        type="date"
+                    label="Voucher Date"
 
-                        label="Voucher Date"
+                    InputLabelProps={{
+                        shrink:true
+                    }}
 
-                        InputLabelProps={{
-                            shrink:true
-                        }}
+                    value={voucherDate}
 
-                        value={voucherDate}
+                    onChange={
+                        e=>
+                        setVoucherDate(
+                            e.target.value
+                        )
+                    }
 
-                        onChange={
-                            e=>setVoucherDate(
-                                e.target.value
-                            )
-                        }
-
-                    />
-
-                </Grid>
-
-
-
-
-
-                <Grid item xs={12} md={3}>
-
-                    <TextField
-
-                        fullWidth
-
-                        label="Reference No"
-
-                        value={referenceNo}
-
-                        onChange={
-                            e=>setReferenceNo(
-                                e.target.value
-                            )
-                        }
-
-                    />
-
-                </Grid>
-
-
-
-
-
-                <Grid item xs={12} md={3}>
-
-                    <TextField
-
-                        fullWidth
-
-                        label="Narration"
-
-                        value={narration}
-
-                        onChange={
-                            e=>setNarration(
-                                e.target.value
-                            )
-                        }
-
-                    />
-
-                </Grid>
-
+                />
 
             </Grid>
 
 
 
 
+            <Grid item xs={12} md={3}>
+
+                <TextField
+
+                    fullWidth
+
+                    label="Reference No"
+
+                    value={referenceNo}
+
+                    onChange={
+                        e=>
+                        setReferenceNo(
+                            e.target.value
+                        )
+                    }
+
+                />
+
+            </Grid>
 
 
 
-            <Paper
-                sx={{
-                    mt:3,
-                    p:2
-                }}
-            >
+
+            <Grid item xs={12} md={3}>
+
+                <TextField
+
+                    fullWidth
+
+                    label="Narration"
+
+                    value={narration}
+
+                    onChange={
+                        e=>
+                        setNarration(
+                            e.target.value
+                        )
+                    }
+
+                />
+
+            </Grid>
 
 
-            {
-                rows.map(row=>(
+        </Grid>
+
+
+
+
+
+
+
+        <Paper
+            sx={{
+                mt:3,
+                p:2
+            }}
+        >
+
+
+        {
+            rows.map(row=>(
 
 
                 <Grid
@@ -579,8 +699,6 @@ const JournalEntryForm = ({ onCancel }) => {
                     mb={2}
 
                     key={row.id}
-
-                    alignItems="center"
 
                 >
 
@@ -597,9 +715,7 @@ const JournalEntryForm = ({ onCancel }) => {
 
                             label="Ledger"
 
-                            value={
-                                row.ledgerId
-                            }
+                            value={row.ledgerId}
 
 
                             onChange={
@@ -611,8 +727,8 @@ const JournalEntryForm = ({ onCancel }) => {
                                 )
                             }
 
-                        >
 
+                        >
 
 
                         {
@@ -621,24 +737,20 @@ const JournalEntryForm = ({ onCancel }) => {
 
                                 <MenuItem
 
-                                    key={
-                                        ledger.id
-                                    }
+                                    key={ledger.id}
 
                                     value={
-                                        ledger.id
+                                        String(ledger.id)
                                     }
 
                                 >
 
-                                    {
-                                        ledger.name
-                                    }
+                                    {ledger.name}
 
                                 </MenuItem>
 
-
                                 )
+
                             )
                         }
 
@@ -647,7 +759,6 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
                     </Grid>
-
 
 
 
@@ -664,9 +775,7 @@ const JournalEntryForm = ({ onCancel }) => {
 
                             label="Debit"
 
-                            value={
-                                row.debit
-                            }
+                            value={row.debit}
 
 
                             onChange={
@@ -689,7 +798,6 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
-
                     <Grid item xs={12} md={3}>
 
 
@@ -701,9 +809,7 @@ const JournalEntryForm = ({ onCancel }) => {
 
                             label="Credit"
 
-                            value={
-                                row.credit
-                            }
+                            value={row.credit}
 
 
                             onChange={
@@ -734,9 +840,7 @@ const JournalEntryForm = ({ onCancel }) => {
                             color="error"
 
                             onClick={
-                                ()=>removeRow(
-                                    row.id
-                                )
+                                ()=>removeRow(row.id)
                             }
 
                         >
@@ -753,34 +857,102 @@ const JournalEntryForm = ({ onCancel }) => {
                 </Grid>
 
 
-                ))
+            ))
+        }
 
+
+        </Paper>
+
+
+
+
+
+
+
+        <Button
+
+            sx={{
+                mt:2
+            }}
+
+            variant="outlined"
+
+            startIcon={
+                <AddIcon/>
             }
 
+            onClick={addRow}
 
-            </Paper>
+        >
+
+            Add Row
+
+
+        </Button>
 
 
 
 
 
+
+
+
+        <Paper
+
+            sx={{
+                mt:3,
+                p:2
+            }}
+
+        >
+
+            <Typography>
+                Total Debit : ₹ {totalDebit}
+            </Typography>
+
+
+            <Typography>
+                Total Credit : ₹ {totalCredit}
+            </Typography>
+
+
+            <Typography>
+                Difference : ₹ {difference}
+            </Typography>
+
+
+        </Paper>
+
+
+
+
+
+
+
+        <Stack
+
+            direction="row"
+
+            spacing={2}
+
+            mt={3}
+
+        >
 
 
             <Button
 
-                sx={{mt:2}}
-
-                variant="outlined"
+                variant="contained"
 
                 startIcon={
-                    <AddIcon/>
+                    <SaveIcon/>
                 }
 
-                onClick={addRow}
+                onClick={handleSave}
 
             >
 
-                Add Row
+                Save Voucher
 
             </Button>
 
@@ -788,101 +960,25 @@ const JournalEntryForm = ({ onCancel }) => {
 
 
 
+            <Button
 
+                variant="outlined"
 
-
-            <Paper
-
-                sx={{
-                    mt:3,
-                    p:2
-                }}
+                onClick={onCancel}
 
             >
 
+                Cancel
 
-                <Typography>
-                    Total Debit : ₹ {totalDebit}
-                </Typography>
-
-
-                <Typography>
-                    Total Credit : ₹ {totalCredit}
-                </Typography>
-
-
-                <Typography
-                    color={
-                        difference===0
-                        ?
-                        "green"
-                        :
-                        "error"
-                    }
-                >
-
-                    Difference : ₹ {difference}
-
-                </Typography>
-
-
-            </Paper>
+            </Button>
 
 
 
+        </Stack>
 
 
 
-
-
-            <Stack
-
-                direction="row"
-
-                spacing={2}
-
-                mt={3}
-
-            >
-
-
-                <Button
-
-                    variant="contained"
-
-                    startIcon={
-                        <SaveIcon/>
-                    }
-
-                    onClick={handleSave}
-
-                >
-
-                    Save Voucher
-
-                </Button>
-
-
-
-
-                <Button
-
-                    variant="outlined"
-
-                    onClick={onCancel}
-
-                >
-
-                    Cancel
-
-                </Button>
-
-
-            </Stack>
-
-
-
-        </Box>
+    </Box>
 
     );
 

@@ -3,6 +3,7 @@ using System;
 using FAATPRO.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FAATPRO.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802085248_AddLedgerPostingTables")]
+    partial class AddLedgerPostingTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -956,7 +959,7 @@ namespace FAATPRO.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("FAATPRO.Domain.Entities.Accounting.Ledger", "Ledger")
-                        .WithMany("JournalEntryDetails")
+                        .WithMany()
                         .HasForeignKey("LedgerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1131,11 +1134,6 @@ namespace FAATPRO.Infrastructure.Migrations
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.JournalEntry", b =>
                 {
                     b.Navigation("Details");
-                });
-
-            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.Ledger", b =>
-                {
-                    b.Navigation("JournalEntryDetails");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPosting", b =>

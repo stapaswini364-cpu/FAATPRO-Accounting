@@ -15,27 +15,61 @@ import JournalEntryList from "./JournalEntryList";
 import JournalEntryForm from "./components/JournalEntryForm";
 
 
-
 const JournalEntry = () => {
 
+
     const [showForm, setShowForm] = useState(false);
+
+    const [editId, setEditId] = useState(null);
+
+
+
+    const handleNewVoucher = () => {
+
+        setEditId(null);
+
+        setShowForm(true);
+
+    };
+
+
+
+    const handleEdit = (id) => {
+
+        setEditId(id);
+
+        setShowForm(true);
+
+    };
+
+
+
+    const handleBack = () => {
+
+        setEditId(null);
+
+        setShowForm(false);
+
+    };
+
 
 
     return (
 
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p:3 }}>
 
             <Paper
                 elevation={3}
-                sx={{ p: 3 }}
+                sx={{p:3}}
             >
+
 
                 <Box
                     sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 3,
+                        display:"flex",
+                        justifyContent:"space-between",
+                        alignItems:"center",
+                        mb:3
                     }}
                 >
 
@@ -47,15 +81,14 @@ const JournalEntry = () => {
                     </Typography>
 
 
+
                     {
                         !showForm && (
 
                             <Button
                                 variant="contained"
                                 startIcon={<AddIcon />}
-                                onClick={() =>
-                                    setShowForm(true)
-                                }
+                                onClick={handleNewVoucher}
                             >
                                 New Voucher
                             </Button>
@@ -71,9 +104,7 @@ const JournalEntry = () => {
                             <Button
                                 variant="outlined"
                                 startIcon={<ArrowBackIcon />}
-                                onClick={() =>
-                                    setShowForm(false)
-                                }
+                                onClick={handleBack}
                             >
                                 Back
                             </Button>
@@ -86,24 +117,38 @@ const JournalEntry = () => {
 
 
 
+
+
                 {
                     showForm ? (
 
                         <JournalEntryForm
-                            onCancel={() =>
-                                setShowForm(false)
-                            }
+
+                            editId={editId}
+
+                            onCancel={handleBack}
+
                         />
 
-                    ) : (
-
-                        <JournalEntryList />
 
                     )
+                    :
+                    (
+
+                        <JournalEntryList
+
+                            onEdit={handleEdit}
+
+                        />
+
+                    )
+
                 }
 
 
+
             </Paper>
+
 
         </Box>
 
