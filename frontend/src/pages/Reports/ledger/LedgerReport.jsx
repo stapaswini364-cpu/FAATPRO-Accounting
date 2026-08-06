@@ -18,6 +18,10 @@ import {
 
 import ledgerApi from "../../../api/ledgerApi";
 
+import {
+    getLedgerReport
+} from "../../../api/reportApi";
+
 
 
 const LedgerReport = () => {
@@ -32,37 +36,33 @@ const LedgerReport = () => {
 
 
     const [ledgerData,setLedgerData] =
-        useState(null);
+        useState([]);
 
 
 
-    // ================= LOAD LEDGERS =================
+    // LOAD LEDGER LIST
 
     const loadLedgers = async()=>{
 
-
         try{
 
-
-            const data =
+            const response =
                 await ledgerApi.getAll();
-
 
 
             setLedgerList(
 
-                Array.isArray(data)
+                Array.isArray(response)
 
                 ?
 
-                data
+                response
 
                 :
 
-                data.data || []
+                response.data || []
 
             );
-
 
         }
         catch(error){
@@ -74,14 +74,13 @@ const LedgerReport = () => {
 
         }
 
-
     };
 
 
 
 
 
-    // ================= LOAD REPORT =================
+    // LOAD STATEMENT
 
 
     const loadLedgerReport = async()=>{
@@ -90,51 +89,44 @@ const LedgerReport = () => {
         if(!ledgerId)
         {
             alert(
-                "Please select ledger"
+                "Select Ledger"
             );
 
             return;
         }
 
 
-
         try{
 
 
-            const data =
-                await ledgerApi.getById(
+            const response =
+                await getLedgerReport(
                     ledgerId
                 );
 
 
-
             console.log(
-                "LEDGER REPORT RESPONSE",
-                data
+                "Ledger Statement",
+                response.data
             );
 
 
-
-            setLedgerData(data);
-
+            setLedgerData(
+                response.data
+            );
 
 
         }
         catch(error){
 
-
             console.error(
-                "Ledger Report Error",
+                "Ledger Statement Error",
                 error
             );
 
-
         }
 
-
     };
-
-
 
 
 
@@ -142,9 +134,7 @@ const LedgerReport = () => {
 
     useEffect(()=>{
 
-
         loadLedgers();
-
 
     },[]);
 
@@ -152,29 +142,18 @@ const LedgerReport = () => {
 
 
 
-
-
-
     const amount=(value)=>{
 
-
         return new Intl.NumberFormat(
-
             "en-IN",
-
             {
-
                 style:"currency",
-
                 currency:"INR"
-
             }
-
         )
         .format(
             Number(value || 0)
         );
-
 
     };
 
@@ -182,96 +161,7 @@ const LedgerReport = () => {
 
 
 
-
-
-    const transactions =
-
-        ledgerData?.transactions
-
-        ||
-
-        ledgerData?.details
-
-        ||
-
-        [];
-
-
-
-
-
-    const ledgerName =
-
-        ledgerData?.ledgerName
-
-        ||
-
-        ledgerData?.name
-
-        ||
-
-        ledgerData?.ledger?.name
-
-        ||
-
-        "-";
-
-
-
-
-
-
-    const openingBalance =
-
-        ledgerData?.openingBalance
-
-        ||
-
-        0;
-
-
-
-
-
-    const closingBalance =
-
-        ledgerData?.closingBalance
-
-        ??
-
-        (
-            openingBalance
-
-            +
-
-            transactions.reduce(
-
-                (sum,row)=>
-
-                sum +
-
-                Number(row.debit || 0)
-
-                -
-
-                Number(row.credit || 0),
-
-                0
-
-            )
-
-        );
-
-
-
-
-
-
-
-
-
 return (
-
 
 <Box sx={{p:3}}>
 
@@ -279,71 +169,41 @@ return (
 <Paper sx={{p:3}}>
 
 
-
 <Typography
-
 variant="h5"
-
-fontWeight={600}
-
+fontWeight="bold"
 mb={3}
-
 >
-
-Ledger Report
-
+Ledger Statement
 </Typography>
 
 
 
 
-
-
-
 <Stack
-
 direction="row"
-
 spacing={2}
-
 mb={3}
-
 >
-
 
 
 <TextField
 
-
 select
-
 
 label="Select Ledger"
 
-
 value={ledgerId}
 
-
 onChange={
-
-e=>
-
-setLedgerId(
-    e.target.value
-)
-
+    e=>setLedgerId(e.target.value)
 }
 
-
 sx={{
-
-minWidth:300
-
+    minWidth:300
 }}
 
-
 >
-
 
 
 {
@@ -351,7 +211,6 @@ minWidth:300
 ledgerList.map(
 
 ledger=>(
-
 
 <MenuItem
 
@@ -361,17 +220,12 @@ value={ledger.id}
 
 >
 
-
 {
 ledger.name
-||
-ledger.ledgerName
 }
-
 
 </MenuItem>
 
-
 )
 
 )
@@ -379,10 +233,7 @@ ledger.ledgerName
 }
 
 
-
 </TextField>
-
-
 
 
 
@@ -394,9 +245,7 @@ variant="contained"
 onClick={loadLedgerReport}
 
 >
-
-Show Report
-
+Show
 </Button>
 
 
@@ -407,61 +256,12 @@ Show Report
 
 
 
-
-
-
-
-{
-
-ledgerData &&
-
-
-<>
-
-
-<Typography>
-
-<b>Ledger Name:</b>{" "}
-
-{ledgerName}
-
-</Typography>
-
-
-
-
-<Typography>
-
-<b>Opening Balance:</b>{" "}
-
-{amount(openingBalance)}
-
-</Typography>
-
-
-
-
-
-
-
-
-<Table
-
-sx={{
-
-mt:3
-
-}}
-
->
-
+<Table>
 
 
 <TableHead>
 
-
 <TableRow>
-
 
 <TableCell>
 Date
@@ -469,12 +269,7 @@ Date
 
 
 <TableCell>
-Voucher No
-</TableCell>
-
-
-<TableCell>
-Narration
+Ledger
 </TableCell>
 
 
@@ -488,13 +283,19 @@ Credit
 </TableCell>
 
 
+<TableCell align="right">
+Balance
+</TableCell>
+
+
+<TableCell>
+Narration
+</TableCell>
+
+
 </TableRow>
 
-
 </TableHead>
-
-
-
 
 
 
@@ -504,94 +305,79 @@ Credit
 
 {
 
-
-transactions.length > 0
+ledgerData.length > 0
 
 ?
 
 
-transactions.map(
+ledgerData.map(
 
-(row,index)=>(
+(row)=>(
 
 
-<TableRow
-
-key={index}
-
->
+<TableRow key={row.id}>
 
 
 <TableCell>
 
 {
-row.date
+new Date(
+row.postingDate
+)
+.toLocaleDateString()
 }
 
 </TableCell>
 
 
 
-
 <TableCell>
 
 {
-row.voucherNo
-||
-row.voucherNumber
-||
-"-"
+row.ledgerName
 }
 
 </TableCell>
-
-
-
-
-
-<TableCell>
-
-{
-row.narration
-||
-"-"
-}
-
-</TableCell>
-
-
 
 
 
 <TableCell align="right">
 
-
 {
-amount(
-row.debit
-)
+amount(row.debit)
 }
 
-
 </TableCell>
-
-
 
 
 
 <TableCell align="right">
 
-
 {
-amount(
-row.credit
-)
+amount(row.credit)
 }
-
 
 </TableCell>
 
 
+
+<TableCell align="right">
+
+{
+amount(row.balance)
+}
+
+</TableCell>
+
+
+
+<TableCell>
+
+{
+row.narration || "-"
+}
+
+</TableCell>
 
 
 
@@ -599,7 +385,6 @@ row.credit
 
 
 )
-
 
 )
 
@@ -609,9 +394,12 @@ row.credit
 
 <TableRow>
 
-<TableCell colSpan={5} align="center">
+<TableCell
+colSpan={6}
+align="center"
+>
 
-No Transactions Found
+No Data
 
 </TableCell>
 
@@ -629,48 +417,10 @@ No Transactions Found
 
 
 
-
-
-
-
-<Typography
-
-mt={3}
-
-fontWeight="bold"
-
->
-
-
-Closing Balance :
-
-{" "}
-
-{
-amount(
-closingBalance
-)
-}
-
-
-
-</Typography>
-
-
-
-</>
-
-
-}
-
-
-
-
 </Paper>
 
 
 </Box>
-
 
 );
 

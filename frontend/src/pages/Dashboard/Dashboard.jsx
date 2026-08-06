@@ -19,9 +19,9 @@ import PaymentsIcon from "@mui/icons-material/Payments";
 
 import KPICard from "./components/KPICard";
 
-
 import RevenueChart from "./components/charts/RevenueChart";
 import ExpenseChart from "./components/charts/ExpenseChart";
+import CashFlowChart from "./components/charts/CashFlowChart";
 
 
 import QuickActions from "./components/dashboard/QuickActions";
@@ -37,7 +37,6 @@ const Dashboard = () => {
 
 
     const [loading,setLoading] = useState(true);
-
 
 
     const [dashboard,setDashboard] = useState({
@@ -76,45 +75,73 @@ const Dashboard = () => {
 
     const loadDashboard = async()=>{
 
-
         try{
-
 
             const response =
                 await getDashboardSummary();
 
 
             console.log(
-                "Dashboard API:",
-                response.data
+                "Dashboard API Response:",
+                response
             );
+
+
+            const data =
+                response.data ?? response;
+
 
 
             setDashboard({
 
-                ...dashboard,
+                totalRevenue:
+                    data.totalRevenue ?? 0,
 
-                ...response.data
+
+                totalExpense:
+                    data.totalExpense ?? 0,
+
+
+                netProfit:
+                    data.netProfit ?? 0,
+
+
+                cashBalance:
+                    data.cashBalance ?? 0,
+
+
+                customers:
+                    data.totalCustomers ?? 0,
+
+
+                vendors:
+                    data.totalVendors ?? 0,
+
+
+                receivable:
+                    data.receivable ?? 0,
+
+
+                payable:
+                    data.payable ?? 0
 
             });
 
 
         }
-        catch(error)
-        {
+        catch(error){
 
             console.error(
+                "Dashboard Load Error",
                 error
             );
 
         }
-        finally
-        {
+        finally{
 
             setLoading(false);
 
         }
-
 
     };
 
@@ -126,12 +153,16 @@ const Dashboard = () => {
     if(loading)
     {
 
-        return (
+        return(
 
             <Box
+
                 display="flex"
+
                 justifyContent="center"
+
                 mt={5}
+
             >
 
                 <CircularProgress />
@@ -146,19 +177,14 @@ const Dashboard = () => {
 
 
 
-
-
     return (
 
         <Box>
 
 
-
             {/* HEADER */}
 
-
             <Box mb={4}>
-
 
                 <Typography
 
@@ -171,7 +197,6 @@ const Dashboard = () => {
                     FAATPRO Finance Dashboard
 
                 </Typography>
-
 
 
                 <Typography
@@ -191,18 +216,16 @@ const Dashboard = () => {
 
 
 
-
-
-
-            {/* KPI SECTION */}
-
+            {/* KPI CARDS */}
 
 
             <Grid
-                container
-                spacing={3}
-            >
 
+                container
+
+                spacing={3}
+
+            >
 
 
                 <Grid item xs={12} sm={6} md={3}>
@@ -213,15 +236,11 @@ const Dashboard = () => {
 
                         value={`₹ ${dashboard.totalRevenue}`}
 
-                        icon={
-                            <TrendingUpIcon />
-                        }
+                        icon={<TrendingUpIcon />}
 
                     />
 
                 </Grid>
-
-
 
 
 
@@ -233,16 +252,11 @@ const Dashboard = () => {
 
                         value={`₹ ${dashboard.totalExpense}`}
 
-                        icon={
-                            <TrendingDownIcon />
-                        }
+                        icon={<TrendingDownIcon />}
 
                     />
 
                 </Grid>
-
-
-
 
 
 
@@ -254,16 +268,11 @@ const Dashboard = () => {
 
                         value={`₹ ${dashboard.netProfit}`}
 
-                        icon={
-                            <PaymentsIcon />
-                        }
+                        icon={<PaymentsIcon />}
 
                     />
 
                 </Grid>
-
-
-
 
 
 
@@ -275,18 +284,11 @@ const Dashboard = () => {
 
                         value={`₹ ${dashboard.cashBalance}`}
 
-                        icon={
-                            <AccountBalanceWalletIcon />
-                        }
+                        icon={<AccountBalanceWalletIcon />}
 
                     />
 
                 </Grid>
-
-
-
-
-
 
 
 
@@ -298,17 +300,11 @@ const Dashboard = () => {
 
                         value={dashboard.customers}
 
-                        icon={
-                            <PeopleIcon />
-                        }
+                        icon={<PeopleIcon />}
 
                     />
 
                 </Grid>
-
-
-
-
 
 
 
@@ -320,18 +316,11 @@ const Dashboard = () => {
 
                         value={dashboard.vendors}
 
-                        icon={
-                            <StoreIcon />
-                        }
+                        icon={<StoreIcon />}
 
                     />
 
                 </Grid>
-
-
-
-
-
 
 
 
@@ -349,10 +338,6 @@ const Dashboard = () => {
 
 
 
-
-
-
-
                 <Grid item xs={12} sm={6} md={3}>
 
                     <KPICard
@@ -366,7 +351,6 @@ const Dashboard = () => {
                 </Grid>
 
 
-
             </Grid>
 
 
@@ -375,10 +359,7 @@ const Dashboard = () => {
 
 
 
-
-
-            {/* CHART SECTION */}
-
+            {/* CHARTS */}
 
 
             <Grid
@@ -392,38 +373,12 @@ const Dashboard = () => {
             >
 
 
+                <Grid item xs={12} md={6}>
 
-                <Grid
-
-                    item
-
-                    xs={12}
-
-                    md={6}
-
-                >
+                    <Paper sx={{p:3,height:350}}>
 
 
-                    <Paper
-
-                        sx={{
-
-                            p:3,
-
-                            height:350
-
-                        }}
-
-                    >
-
-
-                        <Typography
-
-                            variant="h6"
-
-                            mb={2}
-
-                        >
+                        <Typography variant="h6">
 
                             Revenue Overview
 
@@ -435,47 +390,19 @@ const Dashboard = () => {
 
                     </Paper>
 
-
                 </Grid>
 
 
 
 
 
+                <Grid item xs={12} md={6}>
 
 
-
-                <Grid
-
-                    item
-
-                    xs={12}
-
-                    md={6}
-
-                >
+                    <Paper sx={{p:3,height:350}}>
 
 
-                    <Paper
-
-                        sx={{
-
-                            p:3,
-
-                            height:350
-
-                        }}
-
-                    >
-
-
-                        <Typography
-
-                            variant="h6"
-
-                            mb={2}
-
-                        >
+                        <Typography variant="h6">
 
                             Expense Overview
 
@@ -492,9 +419,34 @@ const Dashboard = () => {
 
 
 
+
+
+
+
+                <Grid item xs={12}>
+
+
+                    <Paper sx={{p:3,height:350}}>
+
+
+                        <Typography variant="h6">
+
+                            Cash Flow Overview
+
+                        </Typography>
+
+
+                        <CashFlowChart />
+
+
+                    </Paper>
+
+
+                </Grid>
+
+
+
             </Grid>
-
-
 
 
 
@@ -517,17 +469,18 @@ const Dashboard = () => {
             >
 
 
-                <Grid
 
-                    item
+                <Grid item xs={12} md={7}>
 
-                    xs={12}
 
-                    md={8}
+                    <Paper sx={{p:3}}>
 
-                >
 
-                    <RecentTransactions />
+                        <RecentTransactions />
+
+
+                    </Paper>
+
 
                 </Grid>
 
@@ -535,17 +488,17 @@ const Dashboard = () => {
 
 
 
-                <Grid
+                <Grid item xs={12} md={5}>
 
-                    item
 
-                    xs={12}
+                    <Paper sx={{p:3}}>
 
-                    md={4}
 
-                >
+                        <QuickActions />
 
-                    <QuickActions />
+
+                    </Paper>
+
 
                 </Grid>
 
@@ -559,14 +512,37 @@ const Dashboard = () => {
 
 
 
-
-            <Box mt={3}>
-
-                <AccountSummary />
-
-            </Box>
+            {/* ACCOUNT SUMMARY */}
 
 
+
+            <Grid
+
+                container
+
+                spacing={3}
+
+                mt={2}
+
+            >
+
+
+                <Grid item xs={12}>
+
+
+                    <Paper sx={{p:3}}>
+
+
+                        <AccountSummary />
+
+
+                    </Paper>
+
+
+                </Grid>
+
+
+            </Grid>
 
 
 
@@ -574,8 +550,8 @@ const Dashboard = () => {
 
     );
 
-
 };
+
 
 
 export default Dashboard;

@@ -36,13 +36,11 @@ using FAATPRO.Application.Features.AccountSubGroups.Interfaces;
 using FAATPRO.Application.Features.Dashboard.Interfaces;
 using FAATPRO.Application.Features.Ledgers.Interfaces;
 
-
-// JOURNAL ENTRY
 using FAATPRO.Application.Features.JournalEntries.Interfaces;
 
-
-// LEDGER POSTING
 using FAATPRO.Application.Features.LedgerPosting.Interfaces;
+
+using FAATPRO.Application.Features.Reports.TrialBalance.Interfaces;
 
 
 
@@ -71,15 +69,19 @@ using FAATPRO.Infrastructure.Services.Dashboard;
 using FAATPRO.Infrastructure.Services.Ledger;
 
 
-// JOURNAL ENTRY
 using FAATPRO.Infrastructure.Services.JournalEntry;
 
+using FAATPRO.Infrastructure.Services.PaymentVoucher;
 
-// LEDGER POSTING
+
 using FAATPRO.Infrastructure.Services.LedgerPosting;
 
 
+using FAATPRO.Infrastructure.Services.Reports.TrialBalance;
+
+
 using FAATPRO.Infrastructure.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 
@@ -95,6 +97,10 @@ public static class DependencyInjection
     {
 
 
+        // ==========================
+        // DATABASE
+        // ==========================
+
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(
@@ -103,6 +109,10 @@ public static class DependencyInjection
         });
 
 
+
+        // ==========================
+        // JWT SETTINGS
+        // ==========================
 
         services.Configure<JwtSettings>(
             configuration.GetSection("JwtSettings"));
@@ -115,7 +125,6 @@ public static class DependencyInjection
             .Get<JwtSettings>();
 
 
-
         if(jwtSettings == null)
         {
             throw new Exception(
@@ -124,8 +133,9 @@ public static class DependencyInjection
 
 
 
+
         // ==========================
-        // SERVICES
+        // CORE SERVICES
         // ==========================
 
 
@@ -137,7 +147,6 @@ public static class DependencyInjection
         services.AddScoped<
             IAuthService,
             AuthService>();
-
 
 
         services.AddScoped<
@@ -159,6 +168,13 @@ public static class DependencyInjection
             IRolePermissionService,
             RolePermissionService>();
 
+
+
+
+
+        // ==========================
+        // COMPANY MODULE
+        // ==========================
 
 
         services.AddScoped<
@@ -187,6 +203,13 @@ public static class DependencyInjection
 
 
 
+
+
+        // ==========================
+        // ACCOUNTING MASTER
+        // ==========================
+
+
         services.AddScoped<
             IAccountHeadService,
             AccountHeadService>();
@@ -202,20 +225,36 @@ public static class DependencyInjection
             AccountSubGroupService>();
 
 
+        services.AddScoped<
+            ILedgerService,
+            LedgerService>();
+
+
+
+
+
+        // ==========================
+        // CUSTOMER
+        // ==========================
+
 
         services.AddScoped<
             ICustomerService,
             CustomerService>();
 
 
+
+
+
+        // ==========================
+        // DASHBOARD
+        // ==========================
+
+
         services.AddScoped<
             IDashboardService,
             DashboardService>();
 
-
-        services.AddScoped<
-            ILedgerService,
-            LedgerService>();
 
 
 
@@ -224,6 +263,7 @@ public static class DependencyInjection
         // JOURNAL ENTRY
         // ==========================
 
+
         services.AddScoped<
             IJournalEntryService,
             JournalEntryService>();
@@ -231,9 +271,23 @@ public static class DependencyInjection
 
 
 
+
         // ==========================
-        // LEDGER POSTING
+        // PAYMENT VOUCHER
         // ==========================
+
+
+        services.AddScoped<
+            PaymentVoucherService>();
+
+
+
+
+
+        // ==========================
+        // LEDGER POSTING ENGINE
+        // ==========================
+
 
         services.AddScoped<
             ILedgerPostingService,
@@ -243,57 +297,89 @@ public static class DependencyInjection
 
 
 
+        // ==========================
+        // REPORTS
+        // ==========================
+
+
+        services.AddScoped<
+            ITrialBalanceService,
+            TrialBalanceService>();
+
+
+
+
+
 
         // ==========================
-        // JWT AUTHENTICATION
         // ==========================
+// JWT AUTHENTICATION
+// ==========================
 
-        services.AddAuthentication(
-            JwtBearerDefaults.AuthenticationScheme)
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
-        .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+
+    options.SaveToken = true;
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = jwtSettings.Issuer,
+
+        ValidAudience = jwtSettings.Audience,
+
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+
+        ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
         {
+            Console.WriteLine("========== JWT RECEIVED ==========");
+            Console.WriteLine(context.Request.Headers.Authorization.ToString());
+            Console.WriteLine("==================================");
+            return Task.CompletedTask;
+        },
 
-            options.RequireHttpsMetadata = false;
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("========== JWT VALID ==========");
+            Console.WriteLine(context.Principal?.Identity?.Name);
+            Console.WriteLine("===============================");
+            return Task.CompletedTask;
+        },
 
-            options.SaveToken = true;
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("========== JWT ERROR ==========");
+            Console.WriteLine(context.Exception.ToString());
+            Console.WriteLine("================================");
+            return Task.CompletedTask;
+        },
 
+        OnChallenge = context =>
+        {
+            Console.WriteLine("========== JWT CHALLENGE ==========");
+            Console.WriteLine(context.Error);
+            Console.WriteLine(context.ErrorDescription);
+            Console.WriteLine("===================================");
+            return Task.CompletedTask;
+        }
+    };
+});
 
-            options.TokenValidationParameters =
-                new TokenValidationParameters
-                {
+services.AddAuthorization();
 
-                    ValidateIssuer = true,
-
-                    ValidateAudience = true,
-
-                    ValidateLifetime = true,
-
-                    ValidateIssuerSigningKey = true,
-
-
-                    ValidIssuer =
-                        jwtSettings.Issuer,
-
-
-                    ValidAudience =
-                        jwtSettings.Audience,
-
-
-                    IssuerSigningKey =
-                        new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(
-                                jwtSettings.SecretKey))
-
-                };
-
-        });
-
-
-
-
-
-        services.AddAuthorization();
 
 
 
@@ -302,6 +388,7 @@ public static class DependencyInjection
         // ==========================
         // RBAC PERMISSION
         // ==========================
+
 
         services.AddSingleton<
             IAuthorizationPolicyProvider,

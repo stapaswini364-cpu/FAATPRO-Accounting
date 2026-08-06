@@ -66,6 +66,12 @@ import JournalEntry from "../pages/journalEntry/JournalEntry";
 
 
 
+// ================= PAYMENT VOUCHER =================
+
+import PaymentVoucher from "../pages/paymentVoucher/PaymentVoucher";
+
+
+
 // ================= REPORTS =================
 
 import LedgerReport from "../pages/reports/ledger/LedgerReport";
@@ -83,42 +89,24 @@ return (
 
 
 
-
-
 {/* ================= LOGIN ================= */}
 
-
 <Route
-
 path="/login"
-
 element={<Login />}
-
 />
 
 
-
-
 <Route
-
 path="/forgot-password"
-
 element={<ForgotPassword />}
-
 />
-
-
 
 
 <Route
-
 path="/reset-password"
-
 element={<ResetPassword />}
-
 />
-
-
 
 
 
@@ -126,29 +114,16 @@ element={<ResetPassword />}
 
 {/* ================= DASHBOARD ================= */}
 
-
 <Route
-
 path="/"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <Dashboard />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -156,29 +131,16 @@ element={
 
 {/* ================= CUSTOMERS ================= */}
 
-
 <Route
-
 path="/customers"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <Customers />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -186,28 +148,16 @@ element={
 
 {/* ================= COMPANY ================= */}
 
-
 <Route
-
 path="/company"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <CompanyList />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
 
 
 
@@ -215,28 +165,16 @@ element={
 
 {/* ================= BRANCH ================= */}
 
-
 <Route
-
 path="/branch"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <BranchList />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
 
 
 
@@ -244,29 +182,16 @@ element={
 
 {/* ================= FINANCIAL YEAR ================= */}
 
-
 <Route
-
 path="/financial-year"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <FinancialYear />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -274,29 +199,16 @@ element={
 
 {/* ================= ACCOUNT HEAD ================= */}
 
-
 <Route
-
 path="/account-head"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <AccountHead />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -304,29 +216,16 @@ element={
 
 {/* ================= ACCOUNT GROUP ================= */}
 
-
 <Route
-
 path="/account-group"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <AccountGroup />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -334,29 +233,16 @@ element={
 
 {/* ================= ACCOUNT SUB GROUP ================= */}
 
-
 <Route
-
 path="/account-sub-group"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <AccountSubGroup />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -364,30 +250,16 @@ element={
 
 {/* ================= LEDGER ================= */}
 
-
 <Route
-
 path="/ledger"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <Ledger />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
-
 
 
 
@@ -395,30 +267,16 @@ element={
 
 {/* ================= CHART OF ACCOUNTS ================= */}
 
-
 <Route
-
 path="/chart-of-accounts"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <ChartOfAccounts />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
-
 
 
 
@@ -426,30 +284,33 @@ element={
 
 {/* ================= JOURNAL ENTRY ================= */}
 
-
 <Route
-
 path="/journal-entry"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <JournalEntry />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
 
 
 
 
+
+{/* ================= PAYMENT VOUCHER ================= */}
+
+<Route
+path="/payment-voucher"
+element={
+<ProtectedRoute>
+<MainLayout>
+<PaymentVoucher />
+</MainLayout>
+</ProtectedRoute>
+}
+/>
 
 
 
@@ -457,30 +318,16 @@ element={
 
 {/* ================= LEDGER REPORT ================= */}
 
-
 <Route
-
 path="/reports/ledger"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <LedgerReport />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
-
 
 
 
@@ -488,29 +335,16 @@ element={
 
 {/* ================= SETTINGS ================= */}
 
-
 <Route
-
 path="/settings"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <Settings />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -518,29 +352,16 @@ element={
 
 {/* ================= PROFILE ================= */}
 
-
 <Route
-
 path="/profile"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <Profile />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -548,29 +369,16 @@ element={
 
 {/* ================= CHANGE PASSWORD ================= */}
 
-
 <Route
-
 path="/change-password"
-
 element={
-
 <ProtectedRoute>
-
 <MainLayout>
-
 <ChangePassword />
-
 </MainLayout>
-
 </ProtectedRoute>
-
 }
-
 />
-
-
-
 
 
 
@@ -578,20 +386,13 @@ element={
 
 {/* ================= DEFAULT ================= */}
 
-
 <Route
-
 path="*"
-
 element={<Login />}
-
 />
 
 
-
-
 </Routes>
-
 
 );
 

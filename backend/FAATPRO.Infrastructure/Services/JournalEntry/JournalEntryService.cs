@@ -100,6 +100,7 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
     public async Task<JournalEntryResponse?> GetByIdAsync(Guid id)
     {
 
@@ -118,7 +119,6 @@ public class JournalEntryService : IJournalEntryService
 
         if(entry == null)
             return null;
-
 
 
 
@@ -175,14 +175,14 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
+
     public async Task<JournalEntryResponse> CreateAsync(
         CreateJournalEntryRequest request)
     {
 
-
         var totalDebit =
             request.Details.Sum(x => x.Debit);
-
 
 
         var totalCredit =
@@ -196,8 +196,6 @@ public class JournalEntryService : IJournalEntryService
                 "Debit and Credit must be equal."
             );
         }
-
-
 
 
 
@@ -239,7 +237,6 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-
         foreach(var item in request.Details)
         {
 
@@ -268,8 +265,8 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-
-        await _context.JournalEntries.AddAsync(entry);
+        await _context.JournalEntries
+            .AddAsync(entry);
 
 
         await _context.SaveChangesAsync();
@@ -278,13 +275,8 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-        // ===============================
-        // AUTO LEDGER POSTING
-        // ===============================
-
         await _ledgerPostingService
             .CreatePostingAsync(entry.Id);
-
 
 
 
@@ -305,11 +297,12 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
+
     public async Task<JournalEntryResponse> UpdateAsync(
         Guid id,
         CreateJournalEntryRequest request)
     {
-
 
         var entry =
             await _context.JournalEntries
@@ -347,7 +340,6 @@ public class JournalEntryService : IJournalEntryService
                 "Debit and Credit must be equal."
             );
         }
-
 
 
 
@@ -390,10 +382,8 @@ public class JournalEntryService : IJournalEntryService
 
 
 
-
         _context.JournalEntryDetails
             .RemoveRange(entry.Details);
-
 
 
         entry.Details.Clear();
@@ -435,8 +425,11 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
+        // Rebuild Ledger Posting
+
         await _ledgerPostingService
-            .CreatePostingAsync(id);
+            .RebuildPostingAsync(id);
 
 
 
@@ -457,9 +450,10 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
+
     public async Task<bool> DeleteAsync(Guid id)
     {
-
 
         var entry =
             await _context.JournalEntries
@@ -479,8 +473,18 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+        // Remove Ledger Posting First
+
+        await _ledgerPostingService
+            .DeletePostingAsync(id);
+
+
+
+
+
         _context.JournalEntryDetails
             .RemoveRange(entry.Details);
+
 
 
 
@@ -490,7 +494,9 @@ public class JournalEntryService : IJournalEntryService
 
 
 
+
         await _context.SaveChangesAsync();
+
 
 
 

@@ -17,7 +17,6 @@ public class JournalEntryDetail : BaseEntity
     public string? Narration { get; set; }
 
 
-
     // Navigation
 
     public JournalEntry JournalEntry { get; set; } = null!;

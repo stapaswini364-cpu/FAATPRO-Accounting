@@ -1,12 +1,12 @@
 import {
     Paper,
     Button,
-    Stack,
-    Typography
+    Stack
 } from "@mui/material";
 
 
 import AddIcon from "@mui/icons-material/Add";
+
 
 
 const QuickActions = () => {
@@ -21,16 +21,6 @@ const QuickActions = () => {
             }}
             elevation={3}
         >
-
-
-            <Typography
-                variant="h6"
-                mb={2}
-                fontWeight={600}
-            >
-                Quick Actions
-            </Typography>
-
 
 
             <Stack
@@ -74,6 +64,7 @@ const QuickActions = () => {
     );
 
 };
+
 
 
 export default QuickActions;

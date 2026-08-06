@@ -394,6 +394,12 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.Property<decimal>("Balance")
                         .HasColumnType("numeric");
 
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("Credit")
                         .HasColumnType("numeric");
 
@@ -439,7 +445,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.Property<Guid>("LedgerPostingId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Particulars")
+                    b.Property<string>("Narration")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -449,6 +455,28 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("LedgerPostingId");
 
                     b.ToTable("LedgerPostingDetails");
+                });
+
+            modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.VoucherType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("VoucherTypes");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Branch", b =>

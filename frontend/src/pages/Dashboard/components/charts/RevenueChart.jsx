@@ -1,56 +1,132 @@
+import { useEffect, useState } from "react";
+
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer
 } from "recharts";
 
-const revenueData = [
-  {
-    month: "Jan",
-    revenue: 12000,
-  },
-  {
-    month: "Feb",
-    revenue: 18000,
-  },
-  {
-    month: "Mar",
-    revenue: 15000,
-  },
-  {
-    month: "Apr",
-    revenue: 25000,
-  },
-  {
-    month: "May",
-    revenue: 30000,
-  },
-  {
-    month: "Jun",
-    revenue: 42000,
-  },
-];
+
+import { getRevenueChart } from "../../../../api/dashboardApi";
+
+
 
 const RevenueChart = () => {
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={revenueData}>
-        <CartesianGrid />
 
-        <XAxis dataKey="month" />
 
-        <YAxis />
+    const [data,setData] = useState([]);
 
-        <Tooltip />
 
-        <Line type="monotone" dataKey="revenue" strokeWidth={3} />
-      </LineChart>
-    </ResponsiveContainer>
-  );
+
+    useEffect(()=>{
+
+        loadRevenue();
+
+    },[]);
+
+
+
+
+
+    const loadRevenue = async()=>{
+
+        try{
+
+            const response =
+                await getRevenueChart();
+
+
+            console.log(
+                "Revenue Chart API:",
+                response
+            );
+
+
+            setData(
+
+                Array.isArray(response)
+                ? response.map(item=>({
+
+                    month:item.month,
+
+                    revenue:item.amount
+
+                }))
+                : []
+
+            );
+
+
+        }
+        catch(error){
+
+            console.error(
+                "Revenue Chart Error",
+                error
+            );
+
+        }
+
+    };
+
+
+
+
+
+
+    return(
+
+        <ResponsiveContainer
+            width="100%"
+            height={300}
+        >
+
+            <LineChart data={data}>
+
+
+                <CartesianGrid />
+
+
+                <XAxis
+                    dataKey="month"
+                />
+
+
+                <YAxis />
+
+
+                <Tooltip
+                    formatter={
+                        (value)=>
+                            `₹ ${value.toLocaleString()}`
+                    }
+                />
+
+
+
+                <Line
+
+                    type="monotone"
+
+                    dataKey="revenue"
+
+                    strokeWidth={3}
+
+                />
+
+
+            </LineChart>
+
+
+        </ResponsiveContainer>
+
+    );
+
 };
+
 
 export default RevenueChart;

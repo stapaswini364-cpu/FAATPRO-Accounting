@@ -5,10 +5,8 @@ using FAATPRO.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 
-
 using LedgerPostingEntity =
     FAATPRO.Domain.Entities.Accounting.LedgerPosting;
-
 
 
 namespace FAATPRO.Infrastructure.Services.LedgerPosting;
@@ -20,7 +18,6 @@ public class LedgerPostingService : ILedgerPostingService
     private readonly ApplicationDbContext _context;
 
 
-
     public LedgerPostingService(
         ApplicationDbContext context)
     {
@@ -29,54 +26,37 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
-
-
-
-
     // ==========================================
-    // CREATE LEDGER POSTING
+    // CREATE POSTING
     // ==========================================
 
     public async Task CreatePostingAsync(
         Guid journalEntryId)
     {
 
-
         var entry =
             await _context.JournalEntries
-
             .Include(x => x.Details)
-
             .FirstOrDefaultAsync(
                 x => x.Id == journalEntryId
             );
 
 
-
         if(entry == null)
-        {
             throw new Exception(
                 "Journal Entry not found"
             );
-        }
-
-
-
-
 
 
 
         foreach(var detail in entry.Details)
         {
 
-
             var ledger =
                 await _context.Ledgers
-
                 .FirstOrDefaultAsync(
                     x => x.Id == detail.LedgerId
                 );
-
 
 
             if(ledger == null)
@@ -84,17 +64,11 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
-
-
-
-
             var posting =
                 new LedgerPostingEntity
                 {
 
-                    Id =
-                        Guid.NewGuid(),
-
+                    Id = Guid.NewGuid(),
 
                     JournalEntryId =
                         entry.Id,
@@ -127,24 +101,9 @@ public class LedgerPostingService : ILedgerPostingService
                 };
 
 
-
-
-
-
-
             await _context.LedgerPostings
                 .AddAsync(posting);
 
-
-
-
-
-
-
-
-            // =================================
-            // UPDATE CURRENT BALANCE
-            // =================================
 
 
             ledger.CurrentBalance +=
@@ -152,21 +111,72 @@ public class LedgerPostingService : ILedgerPostingService
                 detail.Credit;
 
 
-
             ledger.ModifiedOn =
                 DateTime.UtcNow;
-
-
 
         }
 
 
 
+        await _context.SaveChangesAsync();
+
+    }
+
+
+
+
+
+
+    // ==========================================
+    // DELETE POSTING
+    // ==========================================
+
+    public async Task DeletePostingAsync(
+        Guid journalEntryId)
+    {
+
+        var postings =
+            await _context.LedgerPostings
+            .Where(
+                x => x.JournalEntryId == journalEntryId
+            )
+            .ToListAsync();
+
+
+
+        foreach(var posting in postings)
+        {
+
+            var ledger =
+                await _context.Ledgers
+                .FirstOrDefaultAsync(
+                    x => x.Id == posting.LedgerId
+                );
+
+
+            if(ledger != null)
+            {
+
+                ledger.CurrentBalance -=
+                    posting.Debit -
+                    posting.Credit;
+
+
+                ledger.ModifiedOn =
+                    DateTime.UtcNow;
+
+            }
+
+        }
+
+
+
+        _context.LedgerPostings
+            .RemoveRange(postings);
 
 
 
         await _context.SaveChangesAsync();
-
 
     }
 
@@ -176,13 +186,33 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
+    // ==========================================
+    // REBUILD POSTING
+    // ==========================================
+
+    public async Task RebuildPostingAsync(
+        Guid journalEntryId)
+    {
+
+        await DeletePostingAsync(
+            journalEntryId
+        );
+
+
+        await CreatePostingAsync(
+            journalEntryId
+        );
+
+    }
+
+
 
 
 
 
 
     // ==========================================
-    // GET LEDGER STATEMENT
+    // LEDGER STATEMENT
     // ==========================================
 
     public async Task<List<LedgerPostingResponse>>
@@ -193,23 +223,15 @@ public class LedgerPostingService : ILedgerPostingService
 
         var ledger =
             await _context.Ledgers
-
             .FirstOrDefaultAsync(
                 x => x.Id == ledgerId
             );
 
 
-
         if(ledger == null)
-        {
             throw new Exception(
                 "Ledger not found"
             );
-        }
-
-
-
-
 
 
 
@@ -228,15 +250,8 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
-
-
-
-
-
         decimal balance =
             ledger.OpeningBalance;
-
-
 
 
 
@@ -245,13 +260,8 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
-
-
-
-
         foreach(var item in postings)
         {
-
 
             balance +=
                 item.Debit -
@@ -259,44 +269,34 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
-
-
             result.Add(
                 new LedgerPostingResponse
                 {
 
-                    Id =
-                        item.Id,
-
+                    Id = item.Id,
 
                     LedgerId =
                         item.LedgerId,
-
 
 
                     LedgerName =
                         ledger.Name,
 
 
-
                     PostingDate =
                         item.PostingDate,
-
 
 
                     Debit =
                         item.Debit,
 
 
-
                     Credit =
                         item.Credit,
 
 
-
                     Balance =
                         balance,
-
 
 
                     Narration =
@@ -308,12 +308,8 @@ public class LedgerPostingService : ILedgerPostingService
 
 
 
-
-
         return result;
 
     }
-
-
 
 }

@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
+
 import {
     Paper,
-    Typography,
     Table,
     TableBody,
     TableCell,
@@ -9,28 +10,104 @@ import {
 } from "@mui/material";
 
 
+import {
+    getRecentTransactions
+} from "../../../../api/dashboardApi";
+
+
+
 const RecentTransactions = () => {
+
+
+    const [
+        transactions,
+        setTransactions
+    ] = useState([]);
+
+
+
+    useEffect(()=>{
+
+        loadTransactions();
+
+    },[]);
+
+
+
+
+
+    const loadTransactions = async()=>{
+
+
+        try{
+
+
+            const response =
+                await getRecentTransactions();
+
+
+
+            console.log(
+                "Recent Transaction API:",
+                response
+            );
+
+
+
+            const data =
+                response?.data
+                ??
+                response;
+
+
+
+            setTransactions(
+
+                Array.isArray(data)
+                ?
+                data
+                :
+                []
+
+            );
+
+
+        }
+        catch(error){
+
+
+            console.error(
+                "Recent Transaction Error",
+                error
+            );
+
+
+            setTransactions([]);
+
+
+        }
+
+
+    };
+
+
+
+
+
 
 
     return (
 
         <Paper
+
             sx={{
                 p:3,
                 borderRadius:3
             }}
+
             elevation={3}
+
         >
-
-
-            <Typography
-                variant="h6"
-                mb={2}
-                fontWeight={600}
-            >
-                Recent Transactions
-            </Typography>
-
 
 
             <Table>
@@ -39,6 +116,7 @@ const RecentTransactions = () => {
                 <TableHead>
 
                     <TableRow>
+
 
                         <TableCell>
                             Voucher No
@@ -67,32 +145,142 @@ const RecentTransactions = () => {
 
 
 
+
+
+
                 <TableBody>
+
+
+                {
+
+                    transactions.length > 0
+
+                    ?
+
+                    transactions.map(
+
+                        (item,index)=>(
+
+
+                            <TableRow
+
+                                key={index}
+
+                            >
+
+
+
+                                <TableCell>
+
+                                    {
+                                        item.voucherNo
+                                        ??
+                                        item.voucherNumber
+                                        ??
+                                        "-"
+                                    }
+
+                                </TableCell>
+
+
+
+
+
+                                <TableCell>
+
+
+                                    {
+
+                                        item.date
+
+                                        ?
+
+                                        new Date(
+                                            item.date
+                                        )
+                                        .toLocaleDateString()
+
+                                        :
+
+                                        "-"
+
+                                    }
+
+
+                                </TableCell>
+
+
+
+
+
+                                <TableCell>
+
+                                    {
+
+                                        item.type
+                                        ??
+                                        item.entryType
+                                        ??
+                                        "Journal"
+
+                                    }
+
+                                </TableCell>
+
+
+
+
+
+                                <TableCell>
+
+
+                                    ₹ {
+
+                                        item.amount
+                                        ??
+                                        item.totalAmount
+                                        ??
+                                        0
+
+                                    }
+
+
+                                </TableCell>
+
+
+
+
+                            </TableRow>
+
+
+                        )
+
+                    )
+
+
+                    :
 
 
                     <TableRow>
 
-                        <TableCell>
-                            -
-                        </TableCell>
 
+                        <TableCell
 
-                        <TableCell>
-                            -
-                        </TableCell>
+                            colSpan={4}
 
+                            align="center"
 
-                        <TableCell>
-                            No Data
-                        </TableCell>
+                        >
 
+                            No Transactions Found
 
-                        <TableCell>
-                            ₹ 0
                         </TableCell>
 
 
                     </TableRow>
+
+
+                }
 
 
                 </TableBody>
@@ -101,11 +289,14 @@ const RecentTransactions = () => {
             </Table>
 
 
+
         </Paper>
 
     );
 
+
 };
+
 
 
 export default RecentTransactions;

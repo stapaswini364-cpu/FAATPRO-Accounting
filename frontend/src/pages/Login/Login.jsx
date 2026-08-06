@@ -11,90 +11,275 @@ import {
   Typography,
 } from "@mui/material";
 
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 import { useState } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux";
 
-import { loginStart, loginSuccess, loginFailure } from "../../redux/auth/authSlice";
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+} from "../../redux/auth/authSlice";
 
 import authService from "../../services/authService";
 
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+} from "react-router-dom";
+
 
 const Login = () => {
+
+
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
-  const { loading, error } = useSelector((state) => state.auth);
 
-  const [showPassword, setShowPassword] = useState(false);
+  const {
+    loading,
+    error
+  } = useSelector(
+    (state)=>state.auth
+  );
 
-  const [formData, setFormData] = useState({
-    email: "",
 
-    password: "",
 
-    remember: false,
-  });
+  const [showPassword,setShowPassword] =
+    useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, checked } = e.target;
+
+
+  const [formData,setFormData] =
+    useState({
+
+      email:"",
+
+      password:"",
+
+      remember:false
+
+    });
+
+
+
+
+  const handleChange = (e)=>{
+
+
+    const {
+      name,
+      value,
+      checked
+    } = e.target;
+
+
 
     setFormData({
+
       ...formData,
 
-      [name]: name === "remember" ? checked : value,
+      [name]:
+        name === "remember"
+        ? checked
+        : value
+
     });
+
+
   };
 
-  const handleSubmit = async (e) => {
+
+
+
+
+
+  const handleSubmit = async(e)=>{
+
+
     e.preventDefault();
 
-    try {
-      dispatch(loginStart());
 
-      const response = await authService.login(
-        formData.email,
+    try{
 
-        formData.password
+
+      dispatch(
+        loginStart()
       );
 
-      dispatch(loginSuccess(response));
 
-      navigate("/dashboard");
-    } catch (error) {
-      dispatch(loginFailure(error.response?.data?.message || "Invalid email or password"));
+
+      const response =
+        await authService.login(
+
+          formData.email,
+
+          formData.password
+
+        );
+
+
+
+      console.log(
+        "LOGIN RESPONSE",
+        response
+      );
+
+
+
+      // ==============================
+      // SAVE JWT TOKEN
+      // ==============================
+
+
+      const accessToken =
+        response?.data?.data?.accessToken;
+
+
+
+      const refreshToken =
+        response?.data?.data?.refreshToken;
+
+
+
+
+      if(accessToken)
+      {
+
+        localStorage.setItem(
+          "token",
+          accessToken
+        );
+
+      }
+
+
+
+      if(refreshToken)
+      {
+
+        localStorage.setItem(
+          "refreshToken",
+          refreshToken
+        );
+
+      }
+
+
+
+
+      // ==============================
+      // REDUX LOGIN
+      // ==============================
+
+
+      dispatch(
+        loginSuccess(response)
+      );
+
+
+
+      navigate(
+        "/dashboard"
+      );
+
+
+
     }
+    catch(error){
+
+
+      console.error(
+        "LOGIN ERROR",
+        error
+      );
+
+
+
+      dispatch(
+
+        loginFailure(
+
+          error.response?.data?.message
+          ||
+          "Invalid email or password"
+
+        )
+
+      );
+
+
+    }
+
+
   };
 
+
+
+
+
+
+
+
   return (
+
+
     <Box
+
       sx={{
-        minHeight: "100vh",
 
-        display: "flex",
+        minHeight:"100vh",
 
-        justifyContent: "center",
+        display:"flex",
 
-        alignItems: "center",
+        justifyContent:"center",
 
-        backgroundColor: "#f5f6fa",
+        alignItems:"center",
+
+        backgroundColor:"#f5f6fa"
+
       }}
+
     >
+
+
       <Card
+
         sx={{
-          width: 400,
 
-          borderRadius: 3,
+          width:400,
 
-          boxShadow: 4,
+          borderRadius:3,
+
+          boxShadow:4
+
         }}
+
       >
-        <CardContent sx={{ p: 4 }}>
+
+
+        <CardContent
+
+          sx={{
+
+            p:4
+
+          }}
+
+        >
+
+
+
           <Typography
+
             variant="h4"
 
             textAlign="center"
@@ -102,32 +287,61 @@ const Login = () => {
             fontWeight="bold"
 
             mb={1}
+
           >
+
             FAATPRO ERP
+
           </Typography>
 
+
+
+
           <Typography
+
             textAlign="center"
 
             color="text.secondary"
 
             mb={3}
+
           >
+
             Welcome Back
+
           </Typography>
 
-          {error && (
+
+
+
+
+          {
+            error &&
+
             <Typography
+
               color="error"
 
               textAlign="center"
+
             >
+
               {error}
+
             </Typography>
-          )}
+
+          }
+
+
+
+
 
           <form onSubmit={handleSubmit}>
+
+
+
             <TextField
+
               fullWidth
 
               label="Email"
@@ -136,14 +350,24 @@ const Login = () => {
 
               placeholder="Enter email"
 
-              value={formData.email}
+              value={
+                formData.email
+              }
 
-              onChange={handleChange}
+              onChange={
+                handleChange
+              }
 
               margin="normal"
+
             />
 
+
+
+
+
             <TextField
+
               fullWidth
 
               label="Password"
@@ -152,40 +376,103 @@ const Login = () => {
 
               placeholder="Enter password"
 
-              type={showPassword ? "text" : "password"}
+              type={
+                showPassword
+                ?
+                "text"
+                :
+                "password"
+              }
 
-              value={formData.password}
+              value={
+                formData.password
+              }
 
-              onChange={handleChange}
+              onChange={
+                handleChange
+              }
 
               margin="normal"
 
+
+
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+
+                endAdornment:(
+
+                  <InputAdornment
+
+                    position="end"
+
+                  >
+
+                    <IconButton
+
+                      onClick={()=>setShowPassword(
+                        !showPassword
+                      )}
+
+                    >
+
+                      {
+                        showPassword
+                        ?
+                        <VisibilityOff/>
+                        :
+                        <Visibility/>
+                      }
+
+
                     </IconButton>
+
+
                   </InputAdornment>
-                ),
+
+                )
+
               }}
+
+
             />
+
+
+
+
+
 
             <FormControlLabel
+
               control={
+
                 <Checkbox
+
                   name="remember"
 
-                  checked={formData.remember}
+                  checked={
+                    formData.remember
+                  }
 
-                  onChange={handleChange}
+                  onChange={
+                    handleChange
+                  }
+
                 />
+
               }
 
+
               label="Remember Me"
+
             />
 
+
+
+
+
+
+
             <Button
+
               fullWidth
 
               type="submit"
@@ -196,31 +483,72 @@ const Login = () => {
 
               disabled={loading}
 
-              sx={{
-                mt: 2,
 
-                mb: 2,
+              sx={{
+
+                mt:2,
+
+                mb:2
+
               }}
+
             >
-              {loading ? "Logging in..." : "Login"}
+
+              {
+                loading
+                ?
+                "Logging in..."
+                :
+                "Login"
+              }
+
+
             </Button>
 
+
+
+
+
+
             <Typography
+
               textAlign="center"
 
               color="primary"
 
               sx={{
-                cursor: "pointer",
+
+                cursor:"pointer"
+
               }}
+
             >
+
               Forgot Password?
+
             </Typography>
+
+
+
+
           </form>
+
+
+
         </CardContent>
+
+
       </Card>
+
+
     </Box>
+
+
   );
+
+
 };
+
+
 
 export default Login;

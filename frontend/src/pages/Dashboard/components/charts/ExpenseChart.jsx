@@ -1,48 +1,137 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useEffect, useState } from "react";
 
-const expenseData = [
-  {
-    month: "Jan",
-    expense: 5000,
-  },
-  {
-    month: "Feb",
-    expense: 8000,
-  },
-  {
-    month: "Mar",
-    expense: 12000,
-  },
-  {
-    month: "Apr",
-    expense: 9000,
-  },
-  {
-    month: "May",
-    expense: 15000,
-  },
-  {
-    month: "Jun",
-    expense: 18000,
-  },
-];
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer
+} from "recharts";
+
+
+import { getExpenseChart } from "../../../../api/dashboardApi";
+
+
 
 const ExpenseChart = () => {
-  return (
-    <ResponsiveContainer width="100%" height={250}>
-      <BarChart data={expenseData}>
-        <CartesianGrid />
 
-        <XAxis dataKey="month" />
 
-        <YAxis />
+    const [data,setData] = useState([]);
 
-        <Tooltip />
 
-        <Bar dataKey="expense" barSize={35} />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+
+    useEffect(()=>{
+
+        loadExpense();
+
+    },[]);
+
+
+
+
+
+    const loadExpense = async()=>{
+
+        try{
+
+            const response =
+                await getExpenseChart();
+
+
+            console.log(
+                "Expense Chart API:",
+                response
+            );
+
+
+
+            setData(
+
+                Array.isArray(response)
+
+                ?
+
+                response.map(item=>({
+
+                    month:item.month,
+
+                    expense:item.amount
+
+                }))
+
+                :
+
+                []
+
+            );
+
+
+        }
+        catch(error){
+
+            console.error(
+                "Expense Chart Error",
+                error
+            );
+
+        }
+
+    };
+
+
+
+
+
+
+    return(
+
+        <ResponsiveContainer
+            width="100%"
+            height={250}
+        >
+
+            <BarChart data={data}>
+
+
+                <CartesianGrid />
+
+
+                <XAxis
+                    dataKey="month"
+                />
+
+
+                <YAxis />
+
+
+                <Tooltip
+                    formatter={
+                        (value)=>
+                            `₹ ${value.toLocaleString()}`
+                    }
+                />
+
+
+
+                <Bar
+
+                    dataKey="expense"
+
+                    barSize={35}
+
+                />
+
+
+            </BarChart>
+
+
+        </ResponsiveContainer>
+
+    );
+
 };
+
 
 export default ExpenseChart;
