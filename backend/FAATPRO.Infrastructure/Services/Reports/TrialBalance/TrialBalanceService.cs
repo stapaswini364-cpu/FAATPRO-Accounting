@@ -5,15 +5,11 @@ using FAATPRO.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 
-
 namespace FAATPRO.Infrastructure.Services.Reports.TrialBalance;
-
 
 public class TrialBalanceService : ITrialBalanceService
 {
-
     private readonly ApplicationDbContext _context;
-
 
     public TrialBalanceService(
         ApplicationDbContext context)
@@ -21,83 +17,41 @@ public class TrialBalanceService : ITrialBalanceService
         _context = context;
     }
 
-
+    // ==========================================
+    // Trial Balance
+    // ==========================================
 
     public async Task<List<TrialBalanceResponse>> GetAsync()
     {
-
-        var ledgers =
-            await _context.Ledgers
-            .ToListAsync();
-
-
-
-        var details =
-            await _context.JournalEntryDetails
-            .Include(x => x.JournalEntry)
-            .ToListAsync();
-
-
-
         var result =
-            new List<TrialBalanceResponse>();
+            await _context.Ledgers
 
+            .GroupJoin(
+                _context.LedgerPostings,
+                ledger => ledger.Id,
+                posting => posting.LedgerId,
+                (ledger, postings) => new TrialBalanceResponse
+                {
+                    LedgerId = ledger.Id,
 
+                    LedgerName = ledger.Name,
 
-        foreach (var ledger in ledgers)
-        {
+                    OpeningBalance = ledger.OpeningBalance,
 
-            var ledgerDetails =
-                details
-                .Where(x => x.LedgerId == ledger.Id)
-                .ToList();
+                    Debit = postings.Sum(x => x.Debit),
 
+                    Credit = postings.Sum(x => x.Credit),
 
+                    ClosingBalance =
+                        ledger.OpeningBalance +
+                        postings.Sum(x => x.Debit) -
+                        postings.Sum(x => x.Credit)
+                })
 
-            var debit =
-                ledgerDetails
-                .Sum(x => x.Debit);
+            .OrderBy(x => x.LedgerName)
 
-
-
-            var credit =
-                ledgerDetails
-                .Sum(x => x.Credit);
-
-
-
-            result.Add(new TrialBalanceResponse
-            {
-
-                LedgerId = ledger.Id,
-
-
-                LedgerName = ledger.Name,
-
-
-                OpeningBalance =
-                    ledger.OpeningBalance,
-
-
-                Debit = debit,
-
-
-                Credit = credit,
-
-
-                ClosingBalance =
-                    ledger.OpeningBalance
-                    + debit
-                    - credit
-
-            });
-
-        }
-
-
+            .ToListAsync();
 
         return result;
-
     }
-
 }

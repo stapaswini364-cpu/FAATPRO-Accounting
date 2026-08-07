@@ -272,11 +272,20 @@ public class ApplicationDbContext : DbContext
             .IsUnique();
 
 
+        // JournalEntry -> VoucherType Relation
+        modelBuilder.Entity<JournalEntry>()
+            .HasOne(x => x.VoucherType)
+            .WithMany()
+            .HasForeignKey(x => x.VoucherTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
         modelBuilder.Entity<JournalEntry>()
             .HasMany(x => x.Details)
             .WithOne(x => x.JournalEntry)
             .HasForeignKey(x => x.JournalEntryId)
             .OnDelete(DeleteBehavior.Cascade);
+
 
 
         modelBuilder.Entity<JournalEntryDetail>()
@@ -287,31 +296,41 @@ public class ApplicationDbContext : DbContext
 
 
 
+        
         // ==========================================
-        // Ledger Posting
-        // ==========================================
-
-        modelBuilder.Entity<LedgerPosting>()
-            .HasOne(x => x.Ledger)
-            .WithMany()
-            .HasForeignKey(x => x.LedgerId)
-            .OnDelete(DeleteBehavior.Restrict);
+// Ledger Posting
+// ==========================================
 
 
-        modelBuilder.Entity<LedgerPosting>()
-            .HasOne(x => x.JournalEntry)
-            .WithMany()
-            .HasForeignKey(x => x.JournalEntryId)
-            .OnDelete(DeleteBehavior.Cascade);
+modelBuilder.Entity<LedgerPosting>()
+    .HasOne(x => x.Ledger)
+    .WithMany(x => x.LedgerPostings)
+    .HasForeignKey(x => x.LedgerId)
+    .OnDelete(DeleteBehavior.Restrict);
 
 
-        modelBuilder.Entity<LedgerPostingDetail>()
-            .HasOne(x => x.LedgerPosting)
-            .WithMany(x => x.Details)
-            .HasForeignKey(x => x.LedgerPostingId)
-            .OnDelete(DeleteBehavior.Cascade);
+
+modelBuilder.Entity<LedgerPosting>()
+    .HasOne(x => x.JournalEntry)
+    .WithMany()
+    .HasForeignKey(x => x.JournalEntryId)
+    .OnDelete(DeleteBehavior.Cascade);
 
 
+
+modelBuilder.Entity<LedgerPostingDetail>()
+    .HasOne(x => x.LedgerPosting)
+    .WithMany(x => x.Details)
+    .HasForeignKey(x => x.LedgerPostingId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+
+
+modelBuilder.Entity<LedgerPostingDetail>()
+    .HasOne(x => x.Ledger)
+    .WithMany(x => x.LedgerPostingDetails)
+    .HasForeignKey(x => x.LedgerId)
+    .OnDelete(DeleteBehavior.Restrict);
 
         // ==========================================
         // Unique Index
@@ -325,5 +344,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Permission>()
             .HasIndex(x => x.Name)
             .IsUnique();
+
     }
 }

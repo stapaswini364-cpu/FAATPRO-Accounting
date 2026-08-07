@@ -5,6 +5,11 @@ namespace FAATPRO.Domain.Entities.Accounting;
 
 public class Ledger : BaseEntity
 {
+
+    // ==========================
+    // Basic Information
+    // ==========================
+
     public string Code { get; set; } = null!;
 
     public string Name { get; set; } = null!;
@@ -34,7 +39,7 @@ public class Ledger : BaseEntity
 
 
     // ==========================
-    // Ledger Running Balance
+    // Running Balance
     // ==========================
 
     public decimal CurrentBalance { get; set; }
@@ -54,7 +59,7 @@ public class Ledger : BaseEntity
 
 
     // ==========================
-    // Tax Details
+    // Tax
     // ==========================
 
     public string? GSTIN { get; set; }
@@ -70,7 +75,7 @@ public class Ledger : BaseEntity
 
 
     // ==========================
-    // Audit Fields
+    // Audit
     // ==========================
 
     public DateTime CreatedOn { get; set; }
@@ -84,7 +89,7 @@ public class Ledger : BaseEntity
 
 
     // ==========================
-    // Navigation Properties
+    // Navigation
     // ==========================
 
     public AccountHead AccountHead { get; set; } = null!;
@@ -96,10 +101,23 @@ public class Ledger : BaseEntity
 
 
     // ==========================
-    // Journal Entry Relation
+    // Journal Entry
     // ==========================
 
     public ICollection<JournalEntryDetail> JournalEntryDetails { get; set; }
         = new List<JournalEntryDetail>();
+
+
+
+    // ==========================
+    // Ledger Posting
+    // ==========================
+
+    public ICollection<LedgerPosting> LedgerPostings { get; set; }
+        = new List<LedgerPosting>();
+
+
+    public ICollection<LedgerPostingDetail> LedgerPostingDetails { get; set; }
+        = new List<LedgerPostingDetail>();
 
 }

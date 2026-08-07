@@ -3,6 +3,7 @@ using System;
 using FAATPRO.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FAATPRO.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260807073954_FixLedgerNavigationRelation")]
+    partial class FixLedgerNavigationRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,7 +73,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("AccountGroups", (string)null);
+                    b.ToTable("AccountGroups");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.AccountHead", b =>
@@ -234,7 +237,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("AccountSubGroups", (string)null);
+                    b.ToTable("AccountSubGroups");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.JournalEntry", b =>
@@ -284,7 +287,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("VoucherTypeId");
 
-                    b.ToTable("JournalEntries", (string)null);
+                    b.ToTable("JournalEntries");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.JournalEntryDetail", b =>
@@ -314,7 +317,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("LedgerId");
 
-                    b.ToTable("JournalEntryDetails", (string)null);
+                    b.ToTable("JournalEntryDetails");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.Ledger", b =>
@@ -387,7 +390,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Ledgers", (string)null);
+                    b.ToTable("Ledgers");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPosting", b =>
@@ -429,7 +432,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("LedgerId");
 
-                    b.ToTable("LedgerPostings", (string)null);
+                    b.ToTable("LedgerPostings");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.LedgerPostingDetail", b =>
@@ -459,7 +462,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("LedgerPostingId");
 
-                    b.ToTable("LedgerPostingDetails", (string)null);
+                    b.ToTable("LedgerPostingDetails");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.VoucherType", b =>
@@ -481,7 +484,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("VoucherTypes", (string)null);
+                    b.ToTable("VoucherTypes");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Branch", b =>
@@ -529,7 +532,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Branches", (string)null);
+                    b.ToTable("Branches");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.City", b =>
@@ -559,7 +562,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("StateId");
 
-                    b.ToTable("Cities", (string)null);
+                    b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Company", b =>
@@ -677,7 +680,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("Countries");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Currency", b =>
@@ -706,7 +709,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Currencies", (string)null);
+                    b.ToTable("Currencies");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Customer", b =>
@@ -736,7 +739,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.FinancialYear", b =>
@@ -787,7 +790,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("FinancialYears", (string)null);
+                    b.ToTable("FinancialYears");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Permission", b =>
@@ -839,7 +842,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Role", b =>
@@ -878,7 +881,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("RolePermissions", (string)null);
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.State", b =>
@@ -908,7 +911,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("States", (string)null);
+                    b.ToTable("States");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.User", b =>
@@ -940,7 +943,7 @@ namespace FAATPRO.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.UserRole", b =>
@@ -955,7 +958,7 @@ namespace FAATPRO.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("FAATPRO.Domain.Entities.Accounting.AccountGroup", b =>

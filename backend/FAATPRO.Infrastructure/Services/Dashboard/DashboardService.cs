@@ -24,157 +24,134 @@ public class DashboardService : IDashboardService
 
 
     // =====================================
+    // Dashboard Summary
     // =====================================
-// Dashboard Summary
-// =====================================
 
-public async Task<DashboardSummaryDto> GetSummaryAsync()
-{
-
-    var revenue =
-        await _context.LedgerPostings
-
-        .Where(x =>
-            x.Ledger.Name.Contains("Sales"))
-
-        .SumAsync(x =>
-            x.Credit);
-
-
-
-    var expense =
-        await _context.LedgerPostings
-
-        .Where(x =>
-            x.Ledger.Name.Contains("Purchase"))
-
-        .SumAsync(x =>
-            x.Debit);
-
-
-
-    var today =
-        DateTime.Today;
-
-
-
-    var todaySales =
-        await _context.JournalEntries
-
-        .Where(x =>
-            x.VoucherDate.Date == today)
-
-        .SelectMany(x =>
-            x.Details)
-
-        .Where(x =>
-            x.Ledger.Name.Contains("Sales"))
-
-        .SumAsync(x =>
-            x.Credit);
-
-
-
-
-    var todayPurchase =
-        await _context.JournalEntries
-
-        .Where(x =>
-            x.VoucherDate.Date == today)
-
-        .SelectMany(x =>
-            x.Details)
-
-        .Where(x =>
-            x.Ledger.Name.Contains("Purchase"))
-
-        .SumAsync(x =>
-            x.Debit);
-
-
-
-
-    var grossProfit =
-        revenue - expense;
-
-
-
-
-    var cash =
-        await _context.Ledgers
-
-        .Where(x =>
-            x.Name.Contains("Cash"))
-
-        .SumAsync(x =>
-            x.OpeningBalance);
-
-
-
-
-    var bank =
-        await _context.Ledgers
-
-        .Where(x =>
-            x.Name.Contains("Bank"))
-
-        .SumAsync(x =>
-            x.OpeningBalance);
-
-
-
-
-    var customers =
-        await _context.Customers
-
-        .CountAsync();
-
-
-
-
-    return new DashboardSummaryDto
+    public async Task<DashboardSummaryDto> GetSummaryAsync()
     {
 
-        TodaySales = todaySales,
 
-        TodayPurchase = todayPurchase,
+        // Revenue = Income Head Credit
 
-        GrossProfit = grossProfit,
+        var revenue =
+            await _context.LedgerPostings
 
+            .Where(x =>
+                x.Ledger.AccountHead.Code == "INC")
 
-        TotalRevenue = revenue,
-
-        TotalExpense = expense,
-
-
-        NetProfit =
-            revenue - expense,
+            .SumAsync(x =>
+                x.Credit);
 
 
-        CashBalance = cash,
 
-        BankBalance = bank,
+        // Expense = Expense Head Debit
+
+        var expense =
+            await _context.LedgerPostings
+
+            .Where(x =>
+                x.Ledger.AccountHead.Code == "EXP")
+
+            .SumAsync(x =>
+                x.Debit);
 
 
-        TotalCustomers = customers,
 
-        TotalVendors = 0,
+        // Cash Balance
+
+        var cashBalance =
+            await _context.LedgerPostings
+
+            .Where(x =>
+                x.Ledger.AccountGroup.Code == "1120")
+
+            .SumAsync(x =>
+                x.Debit - x.Credit);
 
 
-        Receivable = 0,
 
-        Payable = 0
+        // Bank Balance
 
-    };
+        var bankBalance =
+            await _context.LedgerPostings
 
-}
+            .Where(x =>
+                x.Ledger.AccountGroup.Code == "1110")
+
+            .SumAsync(x =>
+                x.Debit - x.Credit);
+
+
+
+        var customers =
+            await _context.Customers
+            .CountAsync();
+
+
+
+        return new DashboardSummaryDto
+        {
+
+            TotalRevenue =
+                revenue,
+
+
+            TotalExpense =
+                expense,
+
+
+            NetProfit =
+                revenue - expense,
+
+
+            CashBalance =
+                cashBalance,
+
+
+            BankBalance =
+                bankBalance,
+
+
+            TotalCustomers =
+                customers,
+
+
+            TotalVendors = 0,
+
+
+            Receivable = 0,
+
+
+            Payable = 0,
+
+
+            TodaySales = 0,
+
+
+            TodayPurchase = 0,
+
+
+            GrossProfit =
+                revenue - expense
+
+        };
+
+
+    }
+
+
+
+
 
     // =====================================
     // Recent Transactions
     // =====================================
 
-    public async Task<List<RecentTransactionDto>> GetRecentTransactionsAsync()
+
+    public async Task<List<RecentTransactionDto>>
+        GetRecentTransactionsAsync()
     {
+
 
         return await _context.JournalEntries
 
@@ -186,11 +163,17 @@ public async Task<DashboardSummaryDto> GetSummaryAsync()
             .Select(x => new RecentTransactionDto
             {
 
-                VoucherNo = x.VoucherNo,
+                VoucherNo =
+                    x.VoucherNo,
 
-                Date = x.VoucherDate,
 
-                Type = "Journal",
+                Date =
+                    x.VoucherDate,
+
+
+                Type =
+                    "Journal",
+
 
                 Amount =
                     x.Details.Sum(d =>
@@ -206,49 +189,63 @@ public async Task<DashboardSummaryDto> GetSummaryAsync()
 
 
 
+
+
     // =====================================
     // Account Summary
     // =====================================
 
-    public async Task<AccountSummaryDto> GetAccountSummaryAsync()
+
+    public async Task<AccountSummaryDto>
+        GetAccountSummaryAsync()
     {
 
+
         var cash =
-            await _context.Ledgers
+            await _context.LedgerPostings
 
             .Where(x =>
-                x.Name.Contains("Cash"))
+                x.Ledger.AccountGroup.Code == "1120")
 
             .SumAsync(x =>
-                x.OpeningBalance);
+                x.Debit - x.Credit);
+
 
 
 
         var bank =
-            await _context.Ledgers
+            await _context.LedgerPostings
 
             .Where(x =>
-                x.Name.Contains("Bank"))
+                x.Ledger.AccountGroup.Code == "1110")
 
             .SumAsync(x =>
-                x.OpeningBalance);
+                x.Debit - x.Credit);
 
 
 
         return new AccountSummaryDto
         {
 
-            Cash = cash,
+            Cash =
+                cash,
 
-            Bank = bank,
+
+            Bank =
+                bank,
+
 
             Receivable = 0,
+
 
             Payable = 0
 
         };
 
+
     }
+
+
 
 
 
@@ -258,71 +255,59 @@ public async Task<DashboardSummaryDto> GetSummaryAsync()
     // Revenue Chart
     // =====================================
 
-    public async Task<List<DashboardChartDto>> GetRevenueChartAsync()
+
+    public async Task<List<DashboardChartDto>>
+        GetRevenueChartAsync()
     {
 
-        var raw =
 
-            await _context.JournalEntries
-
-            .SelectMany(
-                e => e.Details,
-
-                (e,d)=>new
-                {
-                    Year = e.VoucherDate.Year,
-
-                    Month = e.VoucherDate.Month,
-
-                    d.Credit,
-
-                    LedgerName = d.Ledger.Name
-                })
+        var data =
+            await _context.LedgerPostings
 
             .Where(x =>
-                x.LedgerName.Contains("Sales"))
+                x.Ledger.AccountHead.Code == "INC")
 
-            .GroupBy(x=>new
+
+            .GroupBy(x => new
             {
-                x.Year,
 
-                x.Month
+                x.PostingDate.Year,
+
+                x.PostingDate.Month
 
             })
 
-            .Select(x=>new
-            {
-                x.Key.Year,
 
-                x.Key.Month,
+            .Select(x => new DashboardChartDto
+            {
+
+                Month =
+                    new DateTime(
+                        x.Key.Year,
+                        x.Key.Month,
+                        1)
+
+                    .ToString("MMM"),
+
 
                 Amount =
-                    x.Sum(y=>y.Credit)
+                    x.Sum(y =>
+                        y.Credit)
+
 
             })
+
 
             .ToListAsync();
 
 
 
-        return raw.Select(x=>new DashboardChartDto
-        {
-
-            Month =
-                new DateTime(
-                    x.Year,
-                    x.Month,
-                    1)
-
-                .ToString("MMM"),
-
-
-            Amount = x.Amount
-
-
-        }).ToList();
+        return data;
 
     }
+
+
+
 
 
 
@@ -332,72 +317,54 @@ public async Task<DashboardSummaryDto> GetSummaryAsync()
     // Expense Chart
     // =====================================
 
-    public async Task<List<DashboardChartDto>> GetExpenseChartAsync()
+
+    public async Task<List<DashboardChartDto>>
+        GetExpenseChartAsync()
     {
 
-        var raw =
 
-            await _context.JournalEntries
+        return await _context.LedgerPostings
 
-            .SelectMany(
-                e=>e.Details,
-
-                (e,d)=>new
-                {
-                    Year = e.VoucherDate.Year,
-
-                    Month = e.VoucherDate.Month,
-
-                    d.Debit,
-
-                    LedgerName = d.Ledger.Name
-
-                })
-
-            .Where(x=>
-                x.LedgerName.Contains("Purchase"))
-
-            .GroupBy(x=>new
-            {
-                x.Year,
-
-                x.Month
-
-            })
-
-            .Select(x=>new
-            {
-                x.Key.Year,
-
-                x.Key.Month,
-
-                Amount =
-                    x.Sum(y=>y.Debit)
-
-            })
-
-            .ToListAsync();
+        .Where(x =>
+            x.Ledger.AccountHead.Code == "EXP")
 
 
+        .GroupBy(x => new
+        {
 
-        return raw.Select(x=>new DashboardChartDto
+            x.PostingDate.Year,
+
+            x.PostingDate.Month
+
+        })
+
+
+        .Select(x => new DashboardChartDto
         {
 
             Month =
                 new DateTime(
-                    x.Year,
-                    x.Month,
+                    x.Key.Year,
+                    x.Key.Month,
                     1)
 
                 .ToString("MMM"),
 
 
-            Amount = x.Amount
+            Amount =
+                x.Sum(y =>
+                    y.Debit)
 
 
-        }).ToList();
+        })
+
+
+        .ToListAsync();
+
 
     }
+
+
 
 
 
@@ -407,85 +374,55 @@ public async Task<DashboardSummaryDto> GetSummaryAsync()
     // Cash Flow Chart
     // =====================================
 
-    public async Task<List<DashboardChartDto>> GetCashFlowChartAsync()
+
+    public async Task<List<DashboardChartDto>>
+        GetCashFlowChartAsync()
     {
 
-        var raw =
 
-            await _context.JournalEntries
-
-            .SelectMany(
-                e=>e.Details,
-
-                (e,d)=>new
-                {
-
-                    Year = e.VoucherDate.Year,
-
-                    Month = e.VoucherDate.Month,
-
-                    LedgerName = d.Ledger.Name,
-
-                    Debit = d.Debit,
-
-                    Credit = d.Credit
-
-                })
-
-            .Where(x =>
-                x.LedgerName.Contains("Cash")
-                ||
-                x.LedgerName.Contains("Bank"))
-
-            .GroupBy(x=>new
-            {
-                x.Year,
-
-                x.Month
-
-            })
-
-            .Select(x=>new
-            {
-                x.Key.Year,
-
-                x.Key.Month,
+        return await _context.LedgerPostings
 
 
-                // FIXED CASH FLOW CALCULATION
-                Amount =
-                    x.Sum(y =>
-                        y.Credit - y.Debit)
-
-            })
-
-            .OrderBy(x=>x.Year)
-
-            .ThenBy(x=>x.Month)
-
-            .ToListAsync();
+        .Where(x =>
+            x.Ledger.AccountGroup.Code == "1110"
+            ||
+            x.Ledger.AccountGroup.Code == "1120")
 
 
+        .GroupBy(x=>new
+        {
 
-        return raw.Select(x=>new DashboardChartDto
+            x.PostingDate.Year,
+
+            x.PostingDate.Month
+
+        })
+
+
+        .Select(x=>new DashboardChartDto
         {
 
             Month =
                 new DateTime(
-                    x.Year,
-                    x.Month,
+                    x.Key.Year,
+                    x.Key.Month,
                     1)
 
                 .ToString("MMM"),
 
 
-            Amount = x.Amount
+            Amount =
+                x.Sum(y =>
+                    y.Debit -
+                    y.Credit)
+
+        })
 
 
-        }).ToList();
+        .ToListAsync();
+
 
     }
-
 
 
 }
